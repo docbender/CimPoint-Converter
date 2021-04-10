@@ -1,0 +1,44 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net5.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <AssemblyName>cpc</AssemblyName>
+    <Company></Company>
+    <Product>CimPoint Converter</Product>
+    <Authors>Vita Tucek</Authors>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <Copyright>(c)2021 Vita Tucek</Copyright>
+    <Description>CIMPLICITY points converter</Description>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <Configurations>Debug;Release;Release Self Contained</Configurations>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="points\PointGeneratorCimplicity.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="doc\ALL.TXT" />
+    <None Remove="doc\TEST_10.csv" />
+    <None Remove="doc\TEST_10.TXT" />
+    <None Remove="doc\TEST_11.TXT" />
+    <None Remove="doc\TEST_75.TXT" />
+    <None Remove="doc\TEST_82.TXT" />
+    <None Remove="doc\TEST_95.TXT" />
+    <None Remove="doc\TEST_95_out.txt" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\LICENSE">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="doc\" />
+  </ItemGroup>
+
+</Project>
