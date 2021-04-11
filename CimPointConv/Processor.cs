@@ -29,12 +29,16 @@ namespace CimPointConv
 {
     public class Processor : INotifyPropertyChanged
     {
-
+        /// <summary> Line splited values </summary>
+        private readonly List<string> _values = new List<string>(160);
+        /// <summary> Text version representation </summary>
         private string _versionText = "-";
+        /// <summary> Process exception </summary>
         public Exception Exception { get; private set; }
+        /// <summary> Source points </summary>
         public List<CimplicityPoint> Points { get; } = new List<CimplicityPoint>(1000);
+        /// <summary> Processed points </summary>
         public IEnumerable<CimplicityPoint> PointsProcesed;
-        private readonly List<string> _values = new List<string>();
 
         /// <summary>
         /// Point format version
@@ -68,10 +72,19 @@ namespace CimPointConv
             }
         }
 
+        /// <summary>
+        /// Source points count
+        /// </summary>
         public int PointsCount { get => Points.Count; }
 
+        /// <summary>
+        /// Filtered points count
+        /// </summary>
         public int PointsProcessedCount { get => PointsProcesed?.Count() ?? 0; }
 
+        /// <summary>
+        /// Clear data
+        /// </summary>
         public void Clear()
         {
             VersionText = string.Empty;
@@ -80,6 +93,11 @@ namespace CimPointConv
             PointsProcesed = null;
         }
 
+        /// <summary>
+        /// Load points from file
+        /// </summary>
+        /// <param name="file">Path to  file</param>
+        /// <returns></returns>
         public async Task<bool> Load(string file)
         {
 #if DEBUG
@@ -175,11 +193,22 @@ namespace CimPointConv
                 return true;
             });
         }
-        private static String WildCardToRegular(String value)
+
+        /// <summary>
+        /// Transform wildcard string into regular expression
+        /// </summary>
+        /// <param name="value">Wildcard string</param>
+        /// <returns></returns>
+        private static string WildCardToRegular(string value)
         {
             return "^" + Regex.Escape(value).Replace("\\?", ".").Replace("\\*", ".*") + "$";
         }
 
+        /// <summary>
+        /// Process loaded points
+        /// </summary>
+        /// <param name="options">Process parameters</param>
+        /// <returns></returns>
         public async Task<bool> Process(ProcessorOptions options)
         {
             return await Task.Run(() =>
@@ -272,17 +301,28 @@ namespace CimPointConv
                             }
                         }
                     }
+                    if (options.EnablePoint != ProcessorOptions.SetProperty.NotSet)
+                        p.PT_ENABLED = options.EnablePoint == ProcessorOptions.SetProperty.Enable ? 1 : 0;
                     if (options.DisableAlarm && p.ALM_ENABLE == "1")
                         p.ALM_ENABLE = "0";
-                    // if (options.EnableEnterprise != ProcessorOptions.SetProperty.NotSet)
-                    //   p. = "0";
+                    if (options.ReadOnly != ProcessorOptions.SetProperty.NotSet)
+                        p.ACCESS = options.ReadOnly == ProcessorOptions.SetProperty.Enable ? "R" : "W";
+                    if (options.EnableEnterprise != ProcessorOptions.SetProperty.NotSet)
+                        p.ACCESS_FILTER = options.EnableEnterprise == ProcessorOptions.SetProperty.Enable ? "E" : "";
+                    if (options.LogData != ProcessorOptions.SetProperty.NotSet)
+                        p.LOG_DATA = options.LogData == ProcessorOptions.SetProperty.Enable ? 1 : 0;
+                    if (options.PollAfterSet != ProcessorOptions.SetProperty.NotSet && p.PT_ORIGIN == "D")
+                        p.POLL_AFTER_SET = options.PollAfterSet == ProcessorOptions.SetProperty.Enable ? "1" : "0";
                 }
 
-                //Exception = new Exception("Unspecified error");
                 return true;
             });
         }
 
+        /// <summary>
+        /// Filter source points
+        /// </summary>
+        /// <param name="options">Parameters</param>
         private void FilterPoints(ProcessorOptions options)
         {
             Regex pointrgx = null;
@@ -333,6 +373,12 @@ namespace CimPointConv
             OnPropertyChanged("PointsProcessedCount");
         }
 
+        /// <summary>
+        /// Save processed points into file
+        /// </summary>
+        /// <param name="file"></param>
+        /// <param name="format"></param>
+        /// <returns></returns>
         public bool Save(string file, CimFormat format)
         {
             if (PointsProcesed == null)
@@ -388,6 +434,11 @@ namespace CimPointConv
             }
         }
 
+        /// <summary>
+        /// Split line with comma separated values. Function respect quoted strings (description with comma)
+        /// </summary>
+        /// <param name="line">Input line</param>
+        /// <returns></returns>
         private IEnumerable<string> SplitLine(string line)
         {
             _values.Clear();
@@ -428,6 +479,11 @@ namespace CimPointConv
             return _values;
         }
 
+        /// <summary>
+        /// Try to find CIMPLCICITY version format comparing column names
+        /// </summary>
+        /// <param name="columnNames">Source file column names</param>
+        /// <returns></returns>
         private string FindVersion(string[] columnNames)
         {
             if (columnNames.Length == CimplicityPoint.GetPropertiesCount<CimplicityPoint75>())
