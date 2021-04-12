@@ -33,7 +33,7 @@ namespace CimPointConv
     {
         [DllImport("kernel32", SetLastError = true)]
         private static extern bool AllocConsole();
-        [DllImport("kernel32.dll")]
+        [DllImport("kernel32")]
         private static extern bool FreeConsole();
 
 #if DEBUG
@@ -47,10 +47,11 @@ namespace CimPointConv
                 List<string> lowercaseArgs = e.Args.ToList().ConvertAll(x => x.ToLower());
                 if (AllocConsole())
                 {
-                    // your console app code                
-
-                    Console.Write("\rPress any key to continue...");
-                    Console.ReadKey();
+                    Contr.Run(e.Args);
+#if DEBUG
+                    Console.WriteLine("Press Enter to exit");
+                    Console.ReadLine();
+#endif
                     FreeConsole();
                 }
                 Shutdown();

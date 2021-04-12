@@ -15,19 +15,29 @@
     <Configurations>Debug;Release;Release Self Contained</Configurations>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+  </PropertyGroup>
+
   <ItemGroup>
     <Compile Remove="points\PointGeneratorCimplicity.cs" />
   </ItemGroup>
 
   <ItemGroup>
     <None Remove="doc\ALL.TXT" />
+    <None Remove="doc\ALL_VIRT.txt" />
+    <None Remove="doc\Kopírovat %281%29 T_EN.TXT" />
     <None Remove="doc\TEST_10.csv" />
     <None Remove="doc\TEST_10.TXT" />
+    <None Remove="doc\TEST_10_out_asdasdnsdajlkkjghjgsabdasdhadjh.txt" />
     <None Remove="doc\TEST_11.TXT" />
+    <None Remove="doc\TEST_11_out.txt" />
     <None Remove="doc\TEST_75.TXT" />
     <None Remove="doc\TEST_82.TXT" />
     <None Remove="doc\TEST_95.TXT" />
     <None Remove="doc\TEST_95_out.txt" />
+    <None Remove="doc\T_EN.TXT" />
+    <None Remove="doc\T_LOG.TXT" />
   </ItemGroup>
 
   <ItemGroup>
