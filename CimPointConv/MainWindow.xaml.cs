@@ -244,17 +244,24 @@ namespace CimPointConv
 
             if (rbOutClipboard.IsChecked.Value)
             {
-                //TODO
-                throw new NotImplementedException();
+                var result = processor.GetResultAsText(GetTargetFormat());
+                if (result == null)
+                {
+                    Resources["StatusBarColor"] = Brushes.Orange;
+                    statusBarItem1.Content = processor.Exception.Message;
+                }
+                else
+                {
+                    Clipboard.SetText(result);
+                }
             }
             else if (rbOutSource.IsChecked.Value)
             {
-                //TODO
-                throw new NotImplementedException();
+                SaveResult(tbFile.Text);
             }
-            else if (rbOutSource.IsChecked.Value)
+            else if (rbOutAsk.IsChecked.Value)
             {
-                SaveResult();
+                SaveResultAs();
             }
 
             Working = false;
@@ -262,10 +269,19 @@ namespace CimPointConv
 
         private void btnSave_Click(object sender, RoutedEventArgs e)
         {
-            SaveResult();
+            SaveResultAs();
         }
 
-        private void SaveResult()
+        private void SaveResult(string fileName)
+        {
+            if (!processor.Save(fileName, GetTargetFormat()))
+            {
+                Resources["StatusBarColor"] = Brushes.Orange;
+                statusBarItem1.Content = processor.Exception.Message;
+            }
+        }
+
+        private void SaveResultAs()
         {
             SaveFileDialog dlg = new();
             dlg.Title = "Save as...";
@@ -273,17 +289,16 @@ namespace CimPointConv
 
             if (dlg.ShowDialog().Value)
             {
-                var format = cbFormat.IsChecked.Value ? (rbSevenFive.IsChecked.Value ? CimFormat.CIM75 :
-                                                        (rbEightTwo.IsChecked.Value ? CimFormat.CIM82 :
-                                                        (rbNineFive.IsChecked.Value ? CimFormat.CIM95 :
-                                                        CimFormat.WHATEVER))) : CimFormat.WHATEVER;
-
-                if (!processor.Save(dlg.FileName, format))
-                {
-                    Resources["StatusBarColor"] = Brushes.Orange;
-                    statusBarItem1.Content = processor.Exception.Message;
-                }
+                SaveResult(dlg.FileName);
             }
+        }
+
+        private CimFormat GetTargetFormat()
+        {
+            return cbFormat.IsChecked.Value ? (rbSevenFive.IsChecked.Value ? CimFormat.CIM75 :
+                                                    (rbEightTwo.IsChecked.Value ? CimFormat.CIM82 :
+                                                    (rbNineFive.IsChecked.Value ? CimFormat.CIM95 :
+                                                    CimFormat.WHATEVER))) : CimFormat.WHATEVER;
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

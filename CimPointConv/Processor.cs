@@ -374,27 +374,33 @@ namespace CimPointConv
         }
 
         /// <summary>
-        /// Save processed points into file
+        /// Return result of processing
         /// </summary>
-        /// <param name="file"></param>
-        /// <param name="format"></param>
-        /// <returns></returns>
-        public bool Save(string file, CimFormat format)
+        /// <param name="format">Target format</param>
+        /// <returns>Result in CIMPLICITY text format if points were processed. Otherwise null</returns>
+        public string GetResultAsText(CimFormat format)
         {
             if (PointsProcesed == null)
             {
                 Exception = new Exception("Run point processing first");
-                return false;
+                return null;
             }
 
             if (!PointsProcesed.Any())
             {
                 Exception = new Exception("No point in process result");
-                return false;
+                return null;
             }
 
             if (format == CimFormat.WHATEVER)
+            {
                 format = Version;
+            }
+            else if(format != Version)
+            {
+                Exception = new Exception("Format conversion not supported");
+                return null;
+            }
 
             PropertyInfo[] properties;
 
@@ -411,20 +417,34 @@ namespace CimPointConv
                     break;
                 default:
                     Exception = new Exception("Unsupported CIMPLICITY output format");
-                    return false;
+                    return null;
             }
 
-            var lines = new List<string>();
-            lines.Add(string.Concat("PT_ID,", string.Join(",", properties.Select(p => p.Name))));
+            var output = new StringBuilder(300*PointsProcessedCount);
+
+            output.AppendLine(string.Concat("PT_ID,", string.Join(",", properties.Select(p => p.Name))));
 
             foreach (var pt in PointsProcesed)
             {
-                lines.Add(string.Concat(pt.PT_ID, ",", string.Join(",", properties.Select(p => (p.GetValue(pt, null) ?? "").ToString()))));
+                output.AppendLine(string.Concat(pt.PT_ID, ",", string.Join(",", properties.Select(p => (p.GetValue(pt, null) ?? "").ToString()))));
             }
+
+            return output.ToString();
+        }
+
+        /// <summary>
+        /// Save processed points into file
+        /// </summary>
+        /// <param name="file"></param>
+        /// <param name="format"></param>
+        /// <returns></returns>
+        public bool Save(string file, CimFormat format)
+        {
+            var text = GetResultAsText(format);
 
             try
             {
-                File.WriteAllLines(file, lines, Encoding.ASCII);
+                File.WriteAllText(file, text, Encoding.ASCII);
                 return true;
             }
             catch (Exception ex)
