@@ -23,6 +23,7 @@ namespace CimPointConv
         public string OutputFile { get; set; }
 
         public bool Overwrite { get; set; } = false;
+        public Format OutputFormat { get; set; } = Format.WHATEVER;
         public bool PrintVersion { get; set; } = false;
         public bool PrintPointsCount { get; set; } = false;
         public bool PrintDevices { get; set; } = false;        

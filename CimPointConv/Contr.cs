@@ -34,6 +34,12 @@ namespace CimPointConv
                 return;
             }
 
+            if(args.Contains("--printformat"))
+            {
+                Console.WriteLine($"Supported output formats: {string.Join(",", Enum.GetNames(typeof(Format)))}");
+                return;
+            }
+
             ArgsOptions options;
             try
             {
@@ -52,7 +58,7 @@ namespace CimPointConv
                 return;
             }
 
-            if(!System.IO.File.Exists(options.InputFile))
+            if (!System.IO.File.Exists(options.InputFile))
             {
                 Console.WriteLine($"File {options.InputFile} does not exist");
                 return;
@@ -72,6 +78,44 @@ namespace CimPointConv
                 Console.WriteLine(p.Exception.Message);
                 return;
             }
+            Console.WriteLine();
+
+            if (options.PrintVersion)
+                Console.WriteLine($"Detected CIMPLICITY version {p.VersionText}");
+
+            if (options.PrintPointsCount)
+                Console.WriteLine($"Loaded {p.PointsCount} points");
+
+            if (options.PrintDevices)
+            {
+                var devices = p.Points.Select(x => x.DEVICE_ID).Where(x => x.Length > 0).Distinct();
+                Console.WriteLine($"Device list: {string.Join(",", devices)}");
+            }
+
+            if (string.IsNullOrEmpty(options.OutputFile))
+                return;
+
+            Console.WriteLine("Processing data...");
+            if (!p.Process(options).Result)
+            {
+                Console.Write("  ");
+                Console.WriteLine(p.Exception.Message);
+                return;
+            }
+
+            if (options.PrintPointsCount)
+                Console.WriteLine($"Processed {p.PointsProcessedCount}/{p.PointsCount} points");
+
+            if (p.Save(options.OutputFile, options.OutputFormat))
+            {
+                Console.WriteLine($"Data saved into file {options.OutputFile}");
+            }
+            else
+            {
+                Console.Write("  ");
+                Console.WriteLine(p.Exception.Message);
+                return;
+            }
         }
 
         private static void PrintHelp()
@@ -84,6 +128,8 @@ namespace CimPointConv
             Console.WriteLine("  -d               Print all devices");
             Console.WriteLine("  -o FILE          Write result into file");
             Console.WriteLine("  --overwrite      Overwrite existing file");
+            Console.WriteLine("  --format FORMAT  Output format");
+            Console.WriteLine("  --printformat    Print supported formats");
             Console.WriteLine("  -fp FILTER       Filter by points");
             Console.WriteLine("  -fa FILTER       Filter by address");
             Console.WriteLine("  -fd FILTER       Filter by device name");

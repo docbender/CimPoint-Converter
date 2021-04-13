@@ -25,7 +25,7 @@ namespace CimPointConv
         {
             var options = new ArgsOptions();
 
-            for(int i=0;i< args.Length;i++)
+            for (int i = 0; i < args.Length; i++)
             {
                 if (i == 0)
                 {
@@ -59,6 +59,20 @@ namespace CimPointConv
                     else if (args[i] == "--overwrite")
                     {
                         options.Overwrite = true;
+                    }
+                    else if (args[i] == "--format")
+                    {
+                        options.Overwrite = true;
+                        if (args.Length == i + 1 || args[i + 1].StartsWith("-"))
+                            throw new ArgumentException("After switch --format format have to be specified.");
+                        try
+                        {
+                            options.OutputFormat = (Format)Enum.Parse(typeof(Format), args[++i]);
+                        }
+                        catch
+                        {
+                            throw new ArgumentException($"Unsupported output format {args[i]}.");
+                        }
                     }
                     else if (args[i] == "-fp")
                     {
@@ -112,7 +126,7 @@ namespace CimPointConv
                         if (args.Length == i + 1 || args[i + 1].StartsWith("-"))
                             throw new ArgumentException("After switch -iv initialization mode have to be specified.");
 
-                        switch(args[++i])
+                        switch (args[++i])
                         {
                             case "NI":
                                 options.InitVirtualMode = ProcessorOptions.InitializationMode.None;
@@ -128,7 +142,7 @@ namespace CimPointConv
                                 break;
                             default:
                                 throw new ArgumentException($"Invalid initialization mode {args[i]}.");
-                        }                        
+                        }
                     }
                     else if (args[i] == "-pe")
                     {
