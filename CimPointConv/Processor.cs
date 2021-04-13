@@ -43,7 +43,7 @@ namespace CimPointConv
         /// <summary>
         /// Point format version
         /// </summary>
-        public CimFormat Version { get; private set; }
+        public Format Version { get; private set; }
 
         /// <summary>
         /// Text version representation
@@ -59,13 +59,13 @@ namespace CimPointConv
                 _versionText = value;
 
                 if (_versionText.Equals("7.5"))
-                    Version = CimFormat.CIM75;
+                    Version = Format.CIM75;
                 else if (_versionText.Equals("8.2"))
-                    Version = CimFormat.CIM82;
+                    Version = Format.CIM82;
                 else if (VersionText.Equals("9.5") || VersionText.StartsWith("10.") || VersionText.StartsWith("11."))
-                    Version = CimFormat.CIM95;
+                    Version = Format.CIM95;
                 else
-                    Version = CimFormat.WHATEVER;
+                    Version = Format.WHATEVER;
 
                 OnPropertyChanged("Version");
                 OnPropertyChanged("VersionText");
@@ -137,9 +137,9 @@ namespace CimPointConv
 
                                 if (!string.IsNullOrEmpty(VersionText))
                                 {
-                                    if (!(Version == CimFormat.CIM75 && _columnNames.Length == CimplicityPoint.GetPropertiesCount<CimplicityPoint75>()
-                                        || Version == CimFormat.CIM82 && _columnNames.Length == CimplicityPoint.GetPropertiesCount<CimplicityPoint82>()
-                                        || Version == CimFormat.CIM95 && _columnNames.Length == CimplicityPoint.GetPropertiesCount<CimplicityPoint95>()))
+                                    if (!(Version == Format.CIM75 && _columnNames.Length == CimplicityPoint.GetPropertiesCount<CimplicityPoint75>()
+                                        || Version == Format.CIM82 && _columnNames.Length == CimplicityPoint.GetPropertiesCount<CimplicityPoint82>()
+                                        || Version == Format.CIM95 && _columnNames.Length == CimplicityPoint.GetPropertiesCount<CimplicityPoint95>()))
                                     {
                                         Exception = new Exception("Columns did not match with expected version from file header");
                                         VersionText = FindVersion(_columnNames);
@@ -157,11 +157,11 @@ namespace CimPointConv
                             }
 
                             CimplicityPoint point = null;
-                            if (Version == CimFormat.CIM75)
+                            if (Version == Format.CIM75)
                                 point = new CimplicityPoint75();
-                            else if (Version == CimFormat.CIM82)
+                            else if (Version == Format.CIM82)
                                 point = new CimplicityPoint82();
-                            else if (Version == CimFormat.CIM95)
+                            else if (Version == Format.CIM95)
                                 point = new CimplicityPoint95();
                             else
                                 throw new Exception("Unsupported CIMPLICITY version");
@@ -378,7 +378,7 @@ namespace CimPointConv
         /// </summary>
         /// <param name="format">Target format</param>
         /// <returns>Result in CIMPLICITY text format if points were processed. Otherwise null</returns>
-        public string GetResultAsText(CimFormat format)
+        public string GetResultAsText(Format format)
         {
             if (PointsProcesed == null)
             {
@@ -392,7 +392,7 @@ namespace CimPointConv
                 return null;
             }
 
-            if (format == CimFormat.WHATEVER)
+            if (format == Format.WHATEVER)
             {
                 format = Version;
             }
@@ -406,13 +406,13 @@ namespace CimPointConv
 
             switch (format)
             {
-                case CimFormat.CIM75:
+                case Format.CIM75:
                     properties = typeof(CimplicityPoint75).GetProperties().Where(x => !x.Name.Equals("PT_ID")).OrderBy(x => x.Name).ToArray();
                     break;
-                case CimFormat.CIM82:
+                case Format.CIM82:
                     properties = typeof(CimplicityPoint82).GetProperties().Where(x => !x.Name.Equals("PT_ID")).OrderBy(x => x.Name).ToArray();
                     break;
-                case CimFormat.CIM95:
+                case Format.CIM95:
                     properties = typeof(CimplicityPoint95).GetProperties().Where(x => !x.Name.Equals("PT_ID")).OrderBy(x => x.Name).ToArray();
                     break;
                 default:
@@ -438,7 +438,7 @@ namespace CimPointConv
         /// <param name="file"></param>
         /// <param name="format"></param>
         /// <returns></returns>
-        public bool Save(string file, CimFormat format)
+        public bool Save(string file, Format format)
         {
             var text = GetResultAsText(format);
 

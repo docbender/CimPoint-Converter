@@ -25,7 +25,7 @@ using System.Reflection;
 
 namespace CimPointConv
 {
-    public enum CimFormat : int
+    public enum Format : int
     {
         WHATEVER,
         CIM75,

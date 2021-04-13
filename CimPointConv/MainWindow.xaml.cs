@@ -177,11 +177,11 @@ namespace CimPointConv
                     statusBarItem1.Content = "Ready";
                 }
 
-                if (processor.Version == CimFormat.CIM75)
+                if (processor.Version == Format.CIM75)
                     rbSevenFive.IsChecked = true;
-                else if (processor.Version == CimFormat.CIM82)
+                else if (processor.Version == Format.CIM82)
                     rbEightTwo.IsChecked = true;
-                else if (processor.Version == CimFormat.CIM95)
+                else if (processor.Version == Format.CIM95)
                     rbNineFive.IsChecked = true;
             }
             Working = false;
@@ -293,12 +293,12 @@ namespace CimPointConv
             }
         }
 
-        private CimFormat GetTargetFormat()
+        private Format GetTargetFormat()
         {
-            return cbFormat.IsChecked.Value ? (rbSevenFive.IsChecked.Value ? CimFormat.CIM75 :
-                                                    (rbEightTwo.IsChecked.Value ? CimFormat.CIM82 :
-                                                    (rbNineFive.IsChecked.Value ? CimFormat.CIM95 :
-                                                    CimFormat.WHATEVER))) : CimFormat.WHATEVER;
+            return cbFormat.IsChecked.Value ? (rbSevenFive.IsChecked.Value ? Format.CIM75 :
+                                                    (rbEightTwo.IsChecked.Value ? Format.CIM82 :
+                                                    (rbNineFive.IsChecked.Value ? Format.CIM95 :
+                                                    Format.WHATEVER))) : Format.WHATEVER;
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
