@@ -133,8 +133,36 @@ namespace CimPointConv
         public T CloneTo<T>()
         {
             string jsonString = JsonSerializer.Serialize(this);
-
-            return JsonSerializer.Deserialize<T>(jsonString);
+            var result = JsonSerializer.Deserialize<T>(jsonString);
+            if (this is CimplicityPoint75 && result is CimplicityPoint82)
+            {
+                var src75 = this as CimplicityPoint75;
+                var dst82 = result as CimplicityPoint82;
+                dst82.ACK_TIMEOUT_HIHI = src75.ACK_TIMEOUT;
+                dst82.DELETE_REQ_HIHI = src75.DELETE_REQ;
+                dst82.LOG_ACK_HIHI = src75.LOG_ACK;
+                dst82.LOG_DEL_HIHI = src75.LOG_DEL;
+                dst82.LOG_GEN_HIHI = src75.LOG_GEN;
+                dst82.LOG_RESET_HIHI = src75.LOG_RESET;
+                dst82.REP_TIMEOUT_HIHI = src75.REP_TIMEOUT;
+                dst82.RESET_ALLOWED_HIHI = src75.RESET_ALLOWED;
+                dst82.RESET_TIMEOUT_HIHI = src75.RESET_TIMEOUT;
+            }
+            else if (typeof(T) == typeof(CimplicityPoint75) && this is CimplicityPoint82)
+            {
+                var src82 = this as CimplicityPoint82;
+                var dst75 = result as CimplicityPoint75;
+                dst75.ACK_TIMEOUT = src82.ACK_TIMEOUT_HIHI;
+                dst75.DELETE_REQ = src82.DELETE_REQ_HIHI;
+                dst75.LOG_ACK = src82.LOG_ACK_HIHI;
+                dst75.LOG_DEL = src82.LOG_DEL_HIHI;
+                dst75.LOG_GEN = src82.LOG_GEN_HIHI;
+                dst75.LOG_RESET = src82.LOG_RESET_HIHI;
+                dst75.REP_TIMEOUT = src82.REP_TIMEOUT_HIHI;
+                dst75.RESET_ALLOWED = src82.RESET_ALLOWED_HIHI;
+                dst75.RESET_TIMEOUT = src82.RESET_TIMEOUT_HIHI;
+            }
+            return result;
         }
 
         public int GetPropertiesCount()
@@ -149,7 +177,7 @@ namespace CimPointConv
 
         public static IEnumerable<string> GetPropertiesName<T>()
         {
-            return typeof(T).GetProperties().Select(x=>x.Name);
+            return typeof(T).GetProperties().Select(x => x.Name);
         }
 
         internal void SetColumn(string name, string value)

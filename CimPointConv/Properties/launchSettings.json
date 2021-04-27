@@ -1,8 +1,7 @@
 {
   "profiles": {
     "CimPointConv": {
-      "commandName": "Project",
-      "commandLineArgs": "--help"
+      "commandName": "Project"
     }
   }
 }

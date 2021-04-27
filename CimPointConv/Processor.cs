@@ -396,10 +396,15 @@ namespace CimPointConv
             {
                 format = Version;
             }
-            else if(format != Version)
+            else if (format != Version)
             {
-                Exception = new Exception("Format conversion not supported");
-                return null;
+                Type t = null;
+                if (format == Format.CIM75)
+                    PointsProcesed = PointsProcesed.Select(x => x.CloneTo<CimplicityPoint75>());
+                else if (format == Format.CIM82)
+                    PointsProcesed = PointsProcesed.Select(x => x.CloneTo<CimplicityPoint82>());
+                else if (format == Format.CIM95)
+                    PointsProcesed = PointsProcesed.Select(x => x.CloneTo<CimplicityPoint95>());
             }
 
             PropertyInfo[] properties;
@@ -420,7 +425,7 @@ namespace CimPointConv
                     return null;
             }
 
-            var output = new StringBuilder(300*PointsProcessedCount);
+            var output = new StringBuilder(300 * PointsProcessedCount);
 
             output.AppendLine(string.Concat("PT_ID,", string.Join(",", properties.Select(p => p.Name))));
 
