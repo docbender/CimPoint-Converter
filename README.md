@@ -15,6 +15,8 @@ The tool provides batch CIMPLICITY points transformations.
 - Disable alarms
 - Enable/Disable data log, read only, poll after set,...
 
+![App preview](/images/screenshot.png)
+
 ## Usage
 Important: Backup your CIMPLICITY project file before applying CimPoint Converter output.
 1. Export points from CIMPLICITY project using *clie* tool
