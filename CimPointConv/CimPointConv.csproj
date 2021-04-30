@@ -13,6 +13,7 @@
     <Description>CIMPLICITY points converter</Description>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <Configurations>Debug;Release;Release Self Contained</Configurations>
+    <ApplicationIcon>app.ico</ApplicationIcon>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -38,6 +39,15 @@
     <None Remove="doc\TEST_95_out.txt" />
     <None Remove="doc\T_EN.TXT" />
     <None Remove="doc\T_LOG.TXT" />
+    <None Remove="resources\diskette.png" />
+    <None Remove="resources\open.png" />
+    <None Remove="resources\resources.7z" />
+    <None Remove="resources\save.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="resources\open.png" />
+    <Resource Include="resources\save.png" />
   </ItemGroup>
 
   <ItemGroup>

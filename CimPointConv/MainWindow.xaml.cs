@@ -86,7 +86,7 @@ namespace CimPointConv
         {
             get
             {
-                return $"{Assembly.GetEntryAssembly().GetName().Version.ToString(3)} alpha";
+                return $"{Assembly.GetEntryAssembly().GetName().Version.ToString(3)} beta 1";
             }
         }
 
