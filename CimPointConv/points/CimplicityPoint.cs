@@ -129,6 +129,10 @@ namespace CimPointConv
         public string VARIANCE_VAL { get; set; }
         public int VARS { get; set; }
 
+        public CimplicityPoint Clone()
+        {
+            return (CimplicityPoint)this.MemberwiseClone();
+        }
 
         public T CloneTo<T>()
         {
@@ -194,6 +198,103 @@ namespace CimPointConv
             {
                 property.SetValue(this, value);
             }
+        }
+
+        public bool Equals(CimplicityPoint obj)
+        {
+            return PT_ID == obj.PT_ID &&
+                ACCESS == obj.ACCESS &&
+                ACCESS_FILTER == obj.ACCESS_FILTER &&
+                ADDR == obj.ADDR &&
+                ADDR_OFFSET == obj.ADDR_OFFSET &&
+                ADDR_TYPE == obj.ADDR_TYPE &&
+                ALM_ENABLE == obj.ALM_ENABLE &&
+                ALM_CLASS == obj.ALM_CLASS &&
+                ALM_CRITERIA == obj.ALM_CRITERIA &&
+                ALM_DEADBAND == obj.ALM_DEADBAND &&
+                ALM_DELAY == obj.ALM_DELAY &&
+                ALM_HIGH_1 == obj.ALM_HIGH_1 &&
+                ALM_HIGH_2 == obj.ALM_HIGH_2 &&
+                ALM_HLP_FILE == obj.ALM_HLP_FILE &&
+                ALM_LOW_1 == obj.ALM_LOW_1 &&
+                ALM_LOW_2 == obj.ALM_LOW_2 &&
+                ALM_MSG == obj.ALM_MSG &&
+                ALM_ROUTE_OPER == obj.ALM_ROUTE_OPER &&
+                ALM_ROUTE_SYSMGR == obj.ALM_ROUTE_SYSMGR &&
+                ALM_ROUTE_USER == obj.ALM_ROUTE_USER &&
+                ALM_SEVERITY == obj.ALM_SEVERITY &&
+                ALM_STR == obj.ALM_STR &&
+                ALM_TYPE == obj.ALM_TYPE &&
+                ALM_UPDATE_VALUE == obj.ALM_UPDATE_VALUE &&
+                ANALOG_DEADBAND == obj.ANALOG_DEADBAND &&
+                BFR_COUNT == obj.BFR_COUNT &&
+                BFR_DUR == obj.BFR_DUR &&
+                BFR_EVENT_PERIOD == obj.BFR_EVENT_PERIOD &&
+                BFR_EVENT_PT_ID == obj.BFR_EVENT_PT_ID &&
+                BFR_EVENT_TYPE == obj.BFR_EVENT_TYPE &&
+                BFR_EVENT_UNITS == obj.BFR_EVENT_UNITS &&
+                BFR_GATE_COND == obj.BFR_GATE_COND &&
+                BFR_SYNC_TIME == obj.BFR_SYNC_TIME &&
+                CALC_TYPE == obj.CALC_TYPE &&
+                CONV_LIM_HIGH == obj.CONV_LIM_HIGH &&
+                CONV_LIM_LOW == obj.CONV_LIM_LOW &&
+                CONV_TYPE == obj.CONV_TYPE &&
+                DELAY_LOAD == obj.DELAY_LOAD &&
+                DESC == obj.DESC &&
+                DEVIATION_PT == obj.DEVIATION_PT &&
+                DEVICE_ID == obj.DEVICE_ID &&
+                DISP_LIM_HIGH == obj.DISP_LIM_HIGH &&
+                DISP_LIM_LOW == obj.DISP_LIM_LOW &&
+                DISP_TYPE == obj.DISP_TYPE &&
+                DISP_WIDTH == obj.DISP_WIDTH &&
+                ELEMENTS == obj.ELEMENTS &&
+                ENG_UNITS == obj.ENG_UNITS &&
+                ENUM_ID == obj.ENUM_ID &&
+                EQUATION == obj.EQUATION &&
+                EXTRA == obj.EXTRA &&
+                FW_CONV_EQ == obj.FW_CONV_EQ &&
+                GR_SCREEN == obj.GR_SCREEN &&
+                INIT_VAL == obj.INIT_VAL &&
+                JUSTIFICATION == obj.JUSTIFICATION &&
+                LEVEL == obj.LEVEL &&
+                LOCAL == obj.LOCAL &&
+                LOG_DATA == obj.LOG_DATA &&
+                MAX_STACKED == obj.MAX_STACKED &&
+                MEASUREMENT_UNIT_ID == obj.MEASUREMENT_UNIT_ID &&
+                MISC_FLAGS == obj.MISC_FLAGS &&
+                POLL_AFTER_SET == obj.POLL_AFTER_SET &&
+                PRECISION == obj.PRECISION &&
+                PROC_ID == obj.PROC_ID &&
+                PTMGMT_PROC_ID == obj.PTMGMT_PROC_ID &&
+                PT_ENABLED == obj.PT_ENABLED &&
+                PT_ORIGIN == obj.PT_ORIGIN &&
+                PT_SET_INTERVAL == obj.PT_SET_INTERVAL &&
+                PT_SET_TIME == obj.PT_SET_TIME &&
+                PT_TYPE == obj.PT_TYPE &&
+                RANGE_HIGH == obj.RANGE_HIGH &&
+                RANGE_LOW == obj.RANGE_LOW &&
+                RAW_LIM_HIGH == obj.RAW_LIM_HIGH &&
+                RAW_LIM_LOW == obj.RAW_LIM_LOW &&
+                RESET_COND == obj.RESET_COND &&
+                RESET_PT == obj.RESET_PT &&
+                RESOURCE_ID == obj.RESOURCE_ID &&
+                REV_CONV_EQ == obj.REV_CONV_EQ &&
+                ROLLOVER_VAL == obj.ROLLOVER_VAL &&
+                SAFETY_PT == obj.SAFETY_PT &&
+                SAMPLE_INTV == obj.SAMPLE_INTV &&
+                SAMPLE_INTV_UNIT == obj.SAMPLE_INTV_UNIT &&
+                SCAN_RATE == obj.SCAN_RATE &&
+                SETPOINT_HIGH == obj.SETPOINT_HIGH &&
+                SETPOINT_LOW == obj.SETPOINT_LOW &&
+                TIME_OF_DAY == obj.TIME_OF_DAY &&
+                TRIG_CK_PT == obj.TRIG_CK_PT &&
+                TRIG_PT == obj.TRIG_PT &&
+                TRIG_REL == obj.TRIG_REL &&
+                TRIG_VAL == obj.TRIG_VAL &&
+                UAFSET == obj.UAFSET &&
+                UPDATE_CRITERIA == obj.UPDATE_CRITERIA &&
+                VARIANCE_VAL == obj.VARIANCE_VAL &&
+                VARS == obj.VARS;
         }
     }
 }

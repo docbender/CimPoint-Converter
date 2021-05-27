@@ -38,7 +38,7 @@ namespace CimPointConv
         /// <summary> Source points </summary>
         public List<CimplicityPoint> Points { get; } = new List<CimplicityPoint>(1000);
         /// <summary> Processed points </summary>
-        public IEnumerable<CimplicityPoint> PointsProcesed;
+        public CimplicityPoint[] PointsProcesed;
 
         /// <summary>
         /// Point format version
@@ -234,85 +234,90 @@ namespace CimPointConv
                 else
                     devicergx = null;
 
-                foreach (var p in PointsProcesed)
+                for (int i=0;i<PointsProcesed.Count();i++)
                 {
+                    var p2u = PointsProcesed[i].Clone();
+
                     if (pointRename)
                     {
                         if (options.RenameUseRegex)
-                            p.PT_ID = pointrgx.Replace(p.PT_ID, options.RenamePointTo);
+                            p2u.PT_ID = pointrgx.Replace(p2u.PT_ID, options.RenamePointTo);
                         else
-                            p.PT_ID = p.PT_ID.Replace(options.RenamePointMask, options.RenamePointTo);
+                            p2u.PT_ID = p2u.PT_ID.Replace(options.RenamePointMask, options.RenamePointTo);
                     }
                     if (addressRename)
                     {
                         if (options.RenameUseRegex)
-                            p.ADDR = addressrgx.Replace(p.ADDR, options.RenameAddressTo);
+                            p2u.ADDR = addressrgx.Replace(p2u.ADDR, options.RenameAddressTo);
                         else
-                            p.ADDR = p.ADDR.Replace(options.RenameAddressMask, options.RenameAddressTo);
+                            p2u.ADDR = p2u.ADDR.Replace(options.RenameAddressMask, options.RenameAddressTo);
                     }
                     if (deviceRename)
                     {
                         if (options.RenameUseRegex)
-                            p.DEVICE_ID = devicergx.Replace(p.DEVICE_ID, options.RenameDeviceTo);
+                            p2u.DEVICE_ID = devicergx.Replace(p2u.DEVICE_ID, options.RenameDeviceTo);
                         else
-                            p.DEVICE_ID = p.DEVICE_ID.Replace(options.RenameDeviceMask, options.RenameDeviceTo);
+                            p2u.DEVICE_ID = p2u.DEVICE_ID.Replace(options.RenameDeviceMask, options.RenameDeviceTo);
                     }
 
-                    if (options.ConvertToVirtual && p.PT_ORIGIN == "D")
+                    if (options.ConvertToVirtual && p2u.PT_ORIGIN == "D")
                     {
-                        p.ADDR = "";
-                        p.ADDR_OFFSET = "";
-                        p.ADDR_TYPE = "";
-                        p.CALC_TYPE = "EQU";
-                        p.CONV_TYPE = "";
-                        p.DELAY_LOAD = "";
-                        p.DEVICE_ID = "";
-                        p.LOCAL = "0";
-                        p.POLL_AFTER_SET = "";
-                        p.PTMGMT_PROC_ID = "MASTER_PTM0_RP";
-                        p.PT_ORIGIN = "G";
-                        p.RESET_COND = "UN";
-                        p.SCAN_RATE = "";
-                        p.TRIG_REL = "";
-                        p.UPDATE_CRITERIA = "";
-                        p.VARIANCE_VAL = "0";
+                        p2u.ADDR = "";
+                        p2u.ADDR_OFFSET = "";
+                        p2u.ADDR_TYPE = "";
+                        p2u.CALC_TYPE = "EQU";
+                        p2u.CONV_TYPE = "";
+                        p2u.DELAY_LOAD = "";
+                        p2u.DEVICE_ID = "";
+                        p2u.LOCAL = "0";
+                        p2u.POLL_AFTER_SET = "";
+                        p2u.PTMGMT_PROC_ID = "MASTER_PTM0_RP";
+                        p2u.PT_ORIGIN = "G";
+                        p2u.RESET_COND = "UN";
+                        p2u.SCAN_RATE = "";
+                        p2u.TRIG_REL = "";
+                        p2u.UPDATE_CRITERIA = "";
+                        p2u.VARIANCE_VAL = "0";
                     }
                     if (options.InitVirtualMode != ProcessorOptions.InitializationMode.NotSet)
                     {
-                        if (p.RESET_COND.Length > 0)
+                        if (p2u.RESET_COND.Length > 0)
                         {
                             if (options.InitVirtualMode == ProcessorOptions.InitializationMode.Init)
                             {
-                                p.RESET_COND = "IN";
-                                p.INIT_VAL = "0";
+                                p2u.RESET_COND = "IN";
+                                p2u.INIT_VAL = "0";
                             }
                             else if (options.InitVirtualMode == ProcessorOptions.InitializationMode.None)
                             {
-                                p.RESET_COND = "UN";
+                                p2u.RESET_COND = "UN";
                             }
                             else if (options.InitVirtualMode == ProcessorOptions.InitializationMode.Saved)
                             {
-                                p.RESET_COND = "SA";
+                                p2u.RESET_COND = "SA";
                             }
                             else if (options.InitVirtualMode == ProcessorOptions.InitializationMode.SavedOrInit)
                             {
-                                p.RESET_COND = "SI";
-                                p.INIT_VAL = "0";
+                                p2u.RESET_COND = "SI";
+                                p2u.INIT_VAL = "0";
                             }
                         }
                     }
                     if (options.EnablePoint != ProcessorOptions.SetProperty.NotSet)
-                        p.PT_ENABLED = options.EnablePoint == ProcessorOptions.SetProperty.Enable ? 1 : 0;
-                    if (options.DisableAlarm && p.ALM_ENABLE == "1")
-                        p.ALM_ENABLE = "0";
+                        p2u.PT_ENABLED = options.EnablePoint == ProcessorOptions.SetProperty.Enable ? 1 : 0;
+                    if (options.DisableAlarm && p2u.ALM_ENABLE == "1")
+                        p2u.ALM_ENABLE = "0";
                     if (options.ReadOnly != ProcessorOptions.SetProperty.NotSet)
-                        p.ACCESS = options.ReadOnly == ProcessorOptions.SetProperty.Enable ? "R" : "W";
+                        p2u.ACCESS = options.ReadOnly == ProcessorOptions.SetProperty.Enable ? "R" : "W";
                     if (options.EnableEnterprise != ProcessorOptions.SetProperty.NotSet)
-                        p.ACCESS_FILTER = options.EnableEnterprise == ProcessorOptions.SetProperty.Enable ? "E" : "";
+                        p2u.ACCESS_FILTER = options.EnableEnterprise == ProcessorOptions.SetProperty.Enable ? "E" : "";
                     if (options.LogData != ProcessorOptions.SetProperty.NotSet)
-                        p.LOG_DATA = options.LogData == ProcessorOptions.SetProperty.Enable ? 1 : 0;
-                    if (options.PollAfterSet != ProcessorOptions.SetProperty.NotSet && p.PT_ORIGIN == "D")
-                        p.POLL_AFTER_SET = options.PollAfterSet == ProcessorOptions.SetProperty.Enable ? "1" : "0";
+                        p2u.LOG_DATA = options.LogData == ProcessorOptions.SetProperty.Enable ? 1 : 0;
+                    if (options.PollAfterSet != ProcessorOptions.SetProperty.NotSet && p2u.PT_ORIGIN == "D")
+                        p2u.POLL_AFTER_SET = options.PollAfterSet == ProcessorOptions.SetProperty.Enable ? "1" : "0";
+
+                    if(!PointsProcesed[i].Equals(p2u))
+                        PointsProcesed[i] = p2u;
                 }
 
                 return true;
@@ -325,17 +330,16 @@ namespace CimPointConv
         /// <param name="options">Parameters</param>
         private void FilterPoints(ProcessorOptions options)
         {
-            Regex pointrgx = null;
-            Regex addressrgx = null;
-            Regex devicergx = null;
-
             if (string.IsNullOrWhiteSpace(options.FilterPoint) && string.IsNullOrWhiteSpace(options.FilterAddress) && string.IsNullOrWhiteSpace(options.FilterDevice))
-                PointsProcesed = Points;
+                PointsProcesed = Points.ToArray();
             else
             {
                 string pointPattern = options.FilterPoint;
                 string addressPattern = options.FilterAddress;
                 string devicePattern = options.FilterDevice;
+                Regex pointrgx = null;
+                Regex addressrgx = null;
+                Regex devicergx = null;
 
                 if (!options.FilterUseRegex)
                 {
@@ -400,11 +404,11 @@ namespace CimPointConv
             {
                 Type t = null;
                 if (format == Format.CIM75)
-                    PointsProcesed = PointsProcesed.Select(x => x.CloneTo<CimplicityPoint75>());
+                    PointsProcesed = PointsProcesed.Select(x => x.CloneTo<CimplicityPoint75>()).ToArray();
                 else if (format == Format.CIM82)
-                    PointsProcesed = PointsProcesed.Select(x => x.CloneTo<CimplicityPoint82>());
+                    PointsProcesed = PointsProcesed.Select(x => x.CloneTo<CimplicityPoint82>()).ToArray();
                 else if (format == Format.CIM95)
-                    PointsProcesed = PointsProcesed.Select(x => x.CloneTo<CimplicityPoint95>());
+                    PointsProcesed = PointsProcesed.Select(x => x.CloneTo<CimplicityPoint95>()).ToArray();
             }
 
             PropertyInfo[] properties;
