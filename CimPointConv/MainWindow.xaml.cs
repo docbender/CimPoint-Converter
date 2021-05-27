@@ -86,7 +86,7 @@ namespace CimPointConv
         {
             get
             {
-                return $"{Assembly.GetEntryAssembly().GetName().Version.ToString(3)} beta 1";
+                return $"{Assembly.GetEntryAssembly().GetName().Version.ToString(3)} beta 2";
             }
         }
 
@@ -198,17 +198,17 @@ namespace CimPointConv
             {
                 ConvertToVirtual = cbToVirtual.IsChecked.Value,
                 DisableAlarm = cbAlarmDisable.IsChecked.Value,
-                EnableEnterprise = !cbEnterprise.IsChecked.Value ? ProcessorOptions.SetProperty.Disable
+                EnableEnterprise = !cbEnterprise.IsChecked.Value ? ProcessorOptions.SetProperty.NotSet
                     : rbE8eEnable.IsChecked.Value ? ProcessorOptions.SetProperty.Enable : ProcessorOptions.SetProperty.Disable,
-                EnablePoint = !cbEnablePoint.IsChecked.Value ? ProcessorOptions.SetProperty.Disable
+                EnablePoint = !cbEnablePoint.IsChecked.Value ? ProcessorOptions.SetProperty.NotSet
                     : rbPointEnable.IsChecked.Value ? ProcessorOptions.SetProperty.Enable : ProcessorOptions.SetProperty.Disable,
                 InitVirtualMode = !cbInit.IsChecked.Value ? ProcessorOptions.InitializationMode.NotSet
                     : (ProcessorOptions.InitializationMode)cbxInit.SelectedIndex,
-                LogData = !cbLogPoint.IsChecked.Value ? ProcessorOptions.SetProperty.Disable
+                LogData = !cbLogPoint.IsChecked.Value ? ProcessorOptions.SetProperty.NotSet
                     : rbLogEnable.IsChecked.Value ? ProcessorOptions.SetProperty.Enable : ProcessorOptions.SetProperty.Disable,
-                PollAfterSet = !cbPoll.IsChecked.Value ? ProcessorOptions.SetProperty.Disable
+                PollAfterSet = !cbPoll.IsChecked.Value ? ProcessorOptions.SetProperty.NotSet
                     : rbPollSet.IsChecked.Value ? ProcessorOptions.SetProperty.Enable : ProcessorOptions.SetProperty.Disable,
-                ReadOnly = !cbReadOnly.IsChecked.Value ? ProcessorOptions.SetProperty.Disable
+                ReadOnly = !cbReadOnly.IsChecked.Value ? ProcessorOptions.SetProperty.NotSet
                     : rbRoEnable.IsChecked.Value ? ProcessorOptions.SetProperty.Enable : ProcessorOptions.SetProperty.Disable,
                 FilterPoint = tbFilterPoint.Text,
                 FilterAddress = tbFilterAddress.Text,
