@@ -82,6 +82,19 @@ namespace CimPointConv
         /// </summary>
         public int PointsProcessedCount { get => PointsProcesed?.Count() ?? 0; }
 
+        private readonly int ansi;
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        public Processor()
+        {
+            // register codepage provider
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+            // get desktop ansi code page (ACP)
+            ansi = System.Globalization.CultureInfo.CurrentCulture.TextInfo.ANSICodePage;
+        }
+
         /// <summary>
         /// Clear data
         /// </summary>
@@ -100,6 +113,7 @@ namespace CimPointConv
         /// <returns></returns>
         public async Task<bool> Load(string file)
         {
+
 #if DEBUG
             Console.WriteLine($"Opening file {file}...");
 #endif
@@ -112,7 +126,7 @@ namespace CimPointConv
                     bool hasHeader = false;
                     string[] _columnNames = null;
 
-                    foreach (var line in File.ReadLines(file, Encoding.ASCII))
+                    foreach (var line in File.ReadLines(file, Encoding.GetEncoding(ansi)))
                     {
                         //comment
                         if (line.StartsWith("##  File created by"))
@@ -234,7 +248,7 @@ namespace CimPointConv
                 else
                     devicergx = null;
 
-                for (int i=0;i<PointsProcesed.Count();i++)
+                for (int i = 0; i < PointsProcesed.Count(); i++)
                 {
                     var p2u = PointsProcesed[i].Clone();
 
@@ -316,7 +330,7 @@ namespace CimPointConv
                     if (options.PollAfterSet != ProcessorOptions.SetProperty.NotSet && p2u.PT_ORIGIN == "D")
                         p2u.POLL_AFTER_SET = options.PollAfterSet == ProcessorOptions.SetProperty.Enable ? "1" : "0";
 
-                    if(!PointsProcesed[i].Equals(p2u))
+                    if (!PointsProcesed[i].Equals(p2u))
                         PointsProcesed[i] = p2u;
                 }
 
@@ -449,11 +463,11 @@ namespace CimPointConv
         /// <returns></returns>
         public bool Save(string file, Format format)
         {
-            var text = GetResultAsText(format);
+            string text = GetResultAsText(format);
 
             try
             {
-                File.WriteAllText(file, text, Encoding.ASCII);
+                File.WriteAllText(file, text, Encoding.GetEncoding(ansi));
                 return true;
             }
             catch (Exception ex)
