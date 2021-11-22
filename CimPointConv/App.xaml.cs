@@ -33,6 +33,8 @@ namespace CimPointConv
     {
         [DllImport("kernel32", SetLastError = true)]
         private static extern bool AllocConsole();
+        [DllImport("kernel32", SetLastError = true)]
+        private static extern bool AttachConsole(Int32 dwProcessId);
         [DllImport("kernel32")]
         private static extern bool FreeConsole();
 
@@ -44,8 +46,7 @@ namespace CimPointConv
         {
             if (e.Args.Length > 0)
             {
-                List<string> lowercaseArgs = e.Args.ToList().ConvertAll(x => x.ToLower());
-                if (AllocConsole())
+                if (AttachConsole(-1) || AllocConsole())
                 {
                     Contr.Run(e.Args);
 #if DEBUG

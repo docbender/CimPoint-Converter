@@ -25,8 +25,9 @@ namespace CimPointConv
     {
         public static void Run(string[] args)
         {
+            Console.WriteLine("");
             Console.WriteLine($"CimPoint Converter v.{Assembly.GetEntryAssembly().GetName().Version.ToString(3)}");
-            Console.WriteLine($"CimPoint Converter converts CIMPLICITY points");
+            Console.WriteLine("CimPoint Converter converts CIMPLICITY points");
             Console.WriteLine();
             if (args.Contains("--help") || args.Contains("-h") || args.Contains("/?") || args.Contains("-?"))
             {
