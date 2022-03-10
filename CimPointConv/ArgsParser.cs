@@ -1,6 +1,6 @@
 ﻿// This file is part of CimPoint-Converter.
 //
-// Copyright(C) 2021 Vita Tucek
+// Copyright(C) 2022 Vita Tucek
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as published by
