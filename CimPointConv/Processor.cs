@@ -1,6 +1,6 @@
 ﻿// This file is part of CimPoint-Converter.
 //
-// Copyright(C) 2021 Vita Tucek
+// Copyright(C) 2022 Vita Tucek
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as published by
@@ -62,8 +62,10 @@ namespace CimPointConv
                     Version = Format.CIM75;
                 else if (_versionText.Equals("8.2"))
                     Version = Format.CIM82;
-                else if (VersionText.Equals("9.5") || VersionText.StartsWith("10.") || VersionText.StartsWith("11."))
+                else if (VersionText.Equals("9.5") || VersionText.StartsWith("10.") || VersionText.Equals("11.0") || VersionText.Equals("11.1"))
                     Version = Format.CIM95;
+                else if (VersionText.Equals("11.5"))
+                    Version = Format.CIM115;
                 else
                     Version = Format.WHATEVER;
 
@@ -153,7 +155,8 @@ namespace CimPointConv
                                 {
                                     if (!(Version == Format.CIM75 && _columnNames.Length == CimplicityPoint.GetPropertiesCount<CimplicityPoint75>()
                                         || Version == Format.CIM82 && _columnNames.Length == CimplicityPoint.GetPropertiesCount<CimplicityPoint82>()
-                                        || Version == Format.CIM95 && _columnNames.Length == CimplicityPoint.GetPropertiesCount<CimplicityPoint95>()))
+                                        || Version == Format.CIM95 && _columnNames.Length == CimplicityPoint.GetPropertiesCount<CimplicityPoint95>()
+                                        || Version == Format.CIM115 && _columnNames.Length == CimplicityPoint.GetPropertiesCount<CimplicityPoint115>()))
                                     {
                                         Exception = new Exception("Columns did not match with expected version from file header");
                                         VersionText = FindVersion(_columnNames);
@@ -177,6 +180,8 @@ namespace CimPointConv
                                 point = new CimplicityPoint82();
                             else if (Version == Format.CIM95)
                                 point = new CimplicityPoint95();
+                            else if (Version == Format.CIM115)
+                                point = new CimplicityPoint115();
                             else
                                 throw new Exception("Unsupported CIMPLICITY version");
 
@@ -423,6 +428,8 @@ namespace CimPointConv
                     PointsProcesed = PointsProcesed.Select(x => x.CloneTo<CimplicityPoint82>()).ToArray();
                 else if (format == Format.CIM95)
                     PointsProcesed = PointsProcesed.Select(x => x.CloneTo<CimplicityPoint95>()).ToArray();
+                else if (format == Format.CIM115)
+                    PointsProcesed = PointsProcesed.Select(x => x.CloneTo<CimplicityPoint115>()).ToArray();
             }
 
             PropertyInfo[] properties;
@@ -437,6 +444,9 @@ namespace CimPointConv
                     break;
                 case Format.CIM95:
                     properties = typeof(CimplicityPoint95).GetProperties().Where(x => !x.Name.Equals("PT_ID")).OrderBy(x => x.Name).ToArray();
+                    break;
+                case Format.CIM115:
+                    properties = typeof(CimplicityPoint115).GetProperties().Where(x => !x.Name.Equals("PT_ID")).OrderBy(x => x.Name).ToArray();
                     break;
                 default:
                     Exception = new Exception("Unsupported CIMPLICITY output format");
@@ -543,6 +553,11 @@ namespace CimPointConv
             {
                 if (CimplicityPoint.GetPropertiesName<CimplicityPoint95>().All(columnNames.Contains))
                     return "9.5";
+            }
+            else if (columnNames.Length == CimplicityPoint.GetPropertiesCount<CimplicityPoint115>())
+            {
+                if (CimplicityPoint.GetPropertiesName<CimplicityPoint115>().All(columnNames.Contains))
+                    return "11.5";
             }
 
             return null;

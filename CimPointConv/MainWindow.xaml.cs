@@ -1,6 +1,6 @@
 ﻿// This file is part of CimPoint-Converter.
 //
-// Copyright(C) 2021 Vita Tucek
+// Copyright(C) 2022 Vita Tucek
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as published by
@@ -82,7 +82,7 @@ namespace CimPointConv
             }
         }
 
-        public string Version
+        public static string Version
         {
             get
             {
@@ -183,6 +183,8 @@ namespace CimPointConv
                     rbEightTwo.IsChecked = true;
                 else if (processor.Version == Format.CIM95)
                     rbNineFive.IsChecked = true;
+                else if (processor.Version == Format.CIM115)
+                    rbElevenFive.IsChecked = true;
             }
             Working = false;
         }
@@ -298,7 +300,8 @@ namespace CimPointConv
             return cbFormat.IsChecked.Value ? (rbSevenFive.IsChecked.Value ? Format.CIM75 :
                                                     (rbEightTwo.IsChecked.Value ? Format.CIM82 :
                                                     (rbNineFive.IsChecked.Value ? Format.CIM95 :
-                                                    Format.WHATEVER))) : Format.WHATEVER;
+                                                    (rbElevenFive.IsChecked.Value ? Format.CIM115 :
+                                                    Format.WHATEVER)))) : Format.WHATEVER;
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

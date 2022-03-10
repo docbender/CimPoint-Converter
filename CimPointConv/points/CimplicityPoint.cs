@@ -1,6 +1,6 @@
 ﻿// This file is part of CimPoint-Converter.
 //
-// Copyright(C) 2021 Vita Tucek
+// Copyright(C) 2022 Vita Tucek
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as published by
@@ -15,13 +15,9 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Text.Json;
-using System.Reflection;
 
 namespace CimPointConv
 {
@@ -30,7 +26,8 @@ namespace CimPointConv
         WHATEVER,
         CIM75,
         CIM82,
-        CIM95
+        CIM95,
+        CIM115
     };
 
     public class CimplicityPoint

@@ -1,7 +1,7 @@
 ﻿<!--
  This file is part of CimPoint-Converter.
 
- Copyright(C) 2021 Vita Tucek
+ Copyright(C) 2022 Vita Tucek
 
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU Affero General Public License as published by
@@ -254,6 +254,7 @@
                     <RadioButton x:Name="rbSevenFive" Style="{StaticResource rbStyle}" Content="7.5" IsEnabled="{Binding ElementName=cbFormat, Path=IsChecked}"/>
                     <RadioButton x:Name="rbEightTwo" Style="{StaticResource rbStyle}" Content="8.2" IsEnabled="{Binding ElementName=cbFormat, Path=IsChecked}"/>
                     <RadioButton x:Name="rbNineFive" Style="{StaticResource rbStyle}" Content="9.5 - 11" IsEnabled="{Binding ElementName=cbFormat, Path=IsChecked}"/>
+                    <RadioButton x:Name="rbElevenFive" Style="{StaticResource rbStyle}" Content="11.5" IsEnabled="{Binding ElementName=cbFormat, Path=IsChecked}"/>
                 </WrapPanel>
                 <Label Style="{StaticResource labelStyle}"  Content="Save result:" Padding="5,5,0,0"/>
                 <StackPanel Orientation="Vertical" Margin="20,5,0,0">
@@ -262,7 +263,7 @@
                     <RadioButton x:Name="rbOutClipboard" Style="{StaticResource rbStyle}" Content="Clipboard" GroupName="out"/>
                     <StackPanel Orientation="Horizontal" >
                         <RadioButton x:Name="rbOutManual" Style="{StaticResource rbStyle}" Content="Manually" GroupName="out" IsChecked="True" />
-                        <Button x:Name="btnSave" HorizontalAlignment="Center" Margin="20,0,0,5" IsEnabled="{Binding Unlocked}" Click="btnSave_Click" >
+                        <Button x:Name="btnSave" HorizontalAlignment="Center" Margin="20,0,0,5" IsEnabled="{Binding ElementName=rbOutManual, Path=IsChecked}" Click="btnSave_Click" >
                             <StackPanel Orientation="Horizontal">
                                 <Image Height="16" Width="16" Source="resources/save.png" Margin="2,2,10,2" />
                                 <TextBlock Text="Save" Margin="2,2,5,2" />
@@ -288,7 +289,7 @@
                 <Hyperlink Foreground="Silver" FontWeight="SemiBold" TextDecorations="None" RequestNavigate="Hyperlink_RequestNavigate" NavigateUri="https://github.com/docbender/CimPoint-Converter">
                 FOSS
                 <LineBreak />
-                (c)2021 Vita Tucek
+                (c)2022 Vita Tucek
                 </Hyperlink>
             </TextBlock>
         </Grid>

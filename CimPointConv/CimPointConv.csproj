@@ -2,19 +2,19 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net5.0-windows</TargetFramework>
+    <TargetFramework>net6.0-windows</TargetFramework>
     <UseWPF>true</UseWPF>
     <AssemblyName>cpc</AssemblyName>
     <Company></Company>
     <Product>CimPoint Converter</Product>
     <Authors>Vita Tucek</Authors>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
-    <Copyright>(c)2021 Vita Tucek</Copyright>
+    <Copyright>(c)2022 Vita Tucek</Copyright>
     <Description>CIMPLICITY points converter</Description>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <Configurations>Debug;Release;Release Self Contained</Configurations>
     <ApplicationIcon>app.ico</ApplicationIcon>
-    <Version>1.0.1</Version>
+    <Version>1.1.0</Version>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
