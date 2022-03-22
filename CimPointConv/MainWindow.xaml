@@ -23,9 +23,9 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CimPointConv" 
         mc:Ignorable="d"
-        Title="{Binding Version, StringFormat='CimPoint Converter - {0}'}" Height="570" Width="600" Background="#FF2D2D30" Foreground="White" 
+        Title="{Binding Version, StringFormat='CimPoint Converter - {0}'}" Height="590" Width="600" Background="#FF2D2D30" Foreground="White" 
         AllowDrop="True" DragEnter="Window_DragEnter" DragLeave="Window_DragLeave" Drop="Window_Drop" 
-        MinWidth="600" MinHeight="570" ResizeMode="CanResizeWithGrip" BorderThickness="1,1,1,1">
+        MinWidth="600" MinHeight="590" ResizeMode="CanResizeWithGrip" BorderThickness="1,1,1,1">
     <Window.Resources>
         <Style x:Key="labelStyle" TargetType="Label">
             <Setter Property="Foreground" Value="White" />
@@ -249,13 +249,14 @@
         </GroupBox>
         <GroupBox Grid.Row="4" Grid.Column="2" Grid.ColumnSpan="1"  Header="Output" Margin="10,0,0,0">
             <StackPanel Orientation="Vertical" >
-                <CheckBox x:Name="cbFormat" Style="{StaticResource cbStyle}" Content="Convert to CIMPLICITY:" Margin="5,5,0,5" />
+                <CheckBox x:Name="cbFormat" Style="{StaticResource cbStyle}" Content="Convert to CIMPLICITY:" Margin="5,5,0,5" IsChecked="{Binding IsCheckedCimplicity}"/>
                 <WrapPanel Margin="20,0,0,0">
                     <RadioButton x:Name="rbSevenFive" Style="{StaticResource rbStyle}" Content="7.5" IsEnabled="{Binding ElementName=cbFormat, Path=IsChecked}"/>
                     <RadioButton x:Name="rbEightTwo" Style="{StaticResource rbStyle}" Content="8.2" IsEnabled="{Binding ElementName=cbFormat, Path=IsChecked}"/>
                     <RadioButton x:Name="rbNineFive" Style="{StaticResource rbStyle}" Content="9.5 - 11" IsEnabled="{Binding ElementName=cbFormat, Path=IsChecked}"/>
-                    <RadioButton x:Name="rbElevenFive" Style="{StaticResource rbStyle}" Content="11.5" IsEnabled="{Binding ElementName=cbFormat, Path=IsChecked}"/>
+                    <RadioButton x:Name="rbElevenFive" Style="{StaticResource rbStyle}" Content="11.5" IsEnabled="{Binding ElementName=cbFormat, Path=IsChecked}"/>                    
                 </WrapPanel>
+                <CheckBox x:Name="cbIgnition" Style="{StaticResource cbStyle}" Content="Convert to Ignition" Margin="5,5,0,5" IsChecked="{Binding IsCheckedIgnition}"/>
                 <Label Style="{StaticResource labelStyle}"  Content="Save result:" Padding="5,5,0,0"/>
                 <StackPanel Orientation="Vertical" Margin="20,5,0,0">
                     <RadioButton x:Name="rbOutSource" Style="{StaticResource rbStyle}" Content="Source file replace" GroupName="out"/>

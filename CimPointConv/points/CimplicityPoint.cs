@@ -27,7 +27,8 @@ namespace CimPointConv
         CIM75,
         CIM82,
         CIM95,
-        CIM115
+        CIM115,
+        IGNITION
     };
 
     public class CimplicityPoint

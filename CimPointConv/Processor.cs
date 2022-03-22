@@ -419,9 +419,14 @@ namespace CimPointConv
             {
                 format = Version;
             }
+            else if (format == Format.IGNITION)
+            {                
+                var iTags = PointsProcesed.Select(x => IgnitionTag.Create(x));
+                int errors = iTags.Count(x => x==null);
+                return IgnitionFolder.ToJson(iTags.Where(x => x!=null));
+            }
             else if (format != Version)
             {
-                Type t = null;
                 if (format == Format.CIM75)
                     PointsProcesed = PointsProcesed.Select(x => x.CloneTo<CimplicityPoint75>()).ToArray();
                 else if (format == Format.CIM82)
@@ -477,7 +482,7 @@ namespace CimPointConv
 
             try
             {
-                File.WriteAllText(file, text, Encoding.GetEncoding(ansi));
+                File.WriteAllText(file, text, (format == Format.IGNITION) ? Encoding.UTF8 : Encoding.GetEncoding(ansi));
                 return true;
             }
             catch (Exception ex)

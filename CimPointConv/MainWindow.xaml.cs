@@ -90,6 +90,45 @@ namespace CimPointConv
             }
         }
 
+        private bool _IsCheckedCimplicity;
+        private bool _IsCheckedIgnition;
+
+        public bool IsCheckedCimplicity
+        {
+            get { return _IsCheckedCimplicity; }
+            set
+            {
+                if (true == value)
+                {
+                    IsCheckedIgnition = false;
+                    _IsCheckedCimplicity = value;
+                }
+                else
+                {
+                    _IsCheckedCimplicity = value;
+                }
+                OnPropertyChanged("IsCheckedCimplicity");
+            }
+        }
+
+        public bool IsCheckedIgnition
+        {
+            get { return _IsCheckedIgnition; }
+            set
+            {
+                if (true == value)
+                {
+                    IsCheckedCimplicity = false;
+                    _IsCheckedIgnition = value;
+                }
+                else
+                {
+                    _IsCheckedIgnition = value;
+                }
+                OnPropertyChanged("IsCheckedIgnition");
+            }
+        }
+
         private void Window_DragEnter(object sender, DragEventArgs e)
         {
             if (Working)
@@ -259,7 +298,7 @@ namespace CimPointConv
             }
             else if (rbOutSource.IsChecked.Value)
             {
-                SaveResult(tbFile.Text);
+                SaveResult(tbFile.Text, GetTargetFormat());
             }
             else if (rbOutAsk.IsChecked.Value)
             {
@@ -274,34 +313,47 @@ namespace CimPointConv
             SaveResultAs();
         }
 
-        private void SaveResult(string fileName)
+        private void SaveResult(string fileName, Format format)
         {
-            if (!processor.Save(fileName, GetTargetFormat()))
+            if (!processor.Save(fileName, format))
             {
                 Resources["StatusBarColor"] = Brushes.Orange;
                 statusBarItem1.Content = processor.Exception.Message;
+            }
+            else
+            {
+                Resources["StatusBarColor"] = _statusbarcolor;
+                statusBarItem1.Content = "Done";
             }
         }
 
         private void SaveResultAs()
         {
+            var format = GetTargetFormat();
             SaveFileDialog dlg = new();
             dlg.Title = "Save as...";
-            dlg.Filter = "All files (*.*)|*.*";
+            if (format == Format.IGNITION)
+                dlg.Filter = "JSON file (*.json)|*.json";
+            else
+                dlg.Filter = "Text files (*.txt,*.csv)|*.txt,*.csv|All files (*.*)|*.*";
 
             if (dlg.ShowDialog().Value)
             {
-                SaveResult(dlg.FileName);
+                SaveResult(dlg.FileName, format);
             }
         }
 
         private Format GetTargetFormat()
         {
-            return cbFormat.IsChecked.Value ? (rbSevenFive.IsChecked.Value ? Format.CIM75 :
-                                                    (rbEightTwo.IsChecked.Value ? Format.CIM82 :
-                                                    (rbNineFive.IsChecked.Value ? Format.CIM95 :
-                                                    (rbElevenFive.IsChecked.Value ? Format.CIM115 :
-                                                    Format.WHATEVER)))) : Format.WHATEVER;
+            if (cbIgnition.IsChecked.Value)
+                return Format.IGNITION;
+            if (cbFormat.IsChecked.Value)
+                return rbSevenFive.IsChecked.Value ? Format.CIM75 :
+                    (rbEightTwo.IsChecked.Value ? Format.CIM82 :
+                    (rbNineFive.IsChecked.Value ? Format.CIM95 :
+                    (rbElevenFive.IsChecked.Value ? Format.CIM115 :
+                    Format.WHATEVER)));
+            return Format.WHATEVER;
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
