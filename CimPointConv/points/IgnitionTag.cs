@@ -24,37 +24,40 @@ namespace CimPointConv
 {
     internal class IgnitionTag
     {
-        public string name { get; private set; } //TEST_V",
-        public string tagType { get; private set; } //AtomicTag",
-        public string dataType { get; private set; } //Boolean",        
-        public string valueSource { get; private set; } // derived",
-        public string sourceTagPath { get; private set; } //[.]TEST_G",
-        public string opcServer { get; private set; } //Ignition OPC UA Server"
-        public string opcItemPath { get; private set; } // ns\u003d1;s\u003d[Sample_Device]_Meta:ReadOnly/ReadOnlyLong1",             
-        public string documentation { get; private set; } //doc",
-        public string tooltip { get; private set; } //tip",
-        public string formatString { get; private set; } //#,##0.###",                        
-        public bool enabled { get; private set; }//": true,
-        public string engUnit { get; private set; } //Pa",
-        public double engLow { get; private set; } //": 1.0,
-        public double engHigh { get; private set; } //": 1000.0,
-        public string engLimitMode { get; private set; } //Clamp_Both"
-        public string expression { get; private set; } //": "{[.]TEST_G}\u00260x02",        
+        public string name { get; private set; }
+        public string tagType { get; private set; }
+        public string dataType { get; private set; }
+        public string valueSource { get; private set; }
+        public string sourceTagPath { get; private set; }
+        public string opcServer { get; private set; }
+        public string opcItemPath { get; private set; }
+        public string documentation { get; private set; }
+        public string tooltip { get; private set; }
+        public string formatString { get; private set; }
+        public bool enabled { get; private set; }
+        public string engUnit { get; private set; }
+        public double engLow { get; private set; }
+        public double engHigh { get; private set; }
+        public string engLimitMode { get; private set; }
+        public string expression { get; private set; }
         public double rawLow { get; private set; }
         public double rawHigh { get; private set; }
-        public string scaleMode { get; private set; } //Linear",
+        public string scaleMode { get; private set; }
         public double scaledLow { get; private set; }
         public double scaledHigh { get; private set; }
-        public bool readOnly { get; private set; } //": true,        
-        public double deadband { get; private set; } //": 0.01,
+        public bool readOnly { get; private set; }
+        public double deadband { get; private set; }
         public bool historyEnabled { get; private set; }
         public IgnitionAlarm[] alarms { get; private set; }
 
-
+        static List<IgnitionAlarm> alarmList = new List<IgnitionAlarm>();
         private string _conversionError;
         public void SetConversionError(string text)
         {
-            _conversionError = $"{name}: {text}";
+            if (string.IsNullOrEmpty(_conversionError))
+                _conversionError = $"{name}: {text}";
+            else
+                _conversionError += $"{Environment.NewLine}  {text}";
         }
         public string GetConversionError()
         {
@@ -189,10 +192,242 @@ namespace CimPointConv
             if (point.LOG_DATA == 1)
                 tag.historyEnabled = true;
             // alarms
+            if (!string.IsNullOrEmpty(point.ALM_MSG))
+            {
+                alarmList.Clear();
+                // rate
+                if (point.ALM_CRITERIA == "ROC")
+                {
+                    tag.SetConversionError($"Rate of change is not supported by Ignition. Edit tag manually.");
+                }
+                else if (point.ALM_CRITERIA == "ONU")
+                {
+                    alarmList.Add(new IgnitionAlarm()
+                    {
+                        name = point.PT_ID,
+                        mode = "AnyChange",
+                        label = transAlmMsg(point.ALM_MSG),
+                        priority = transAlmClass(point.ALM_CLASS, tag)
+                    });
+                }
+                else if (point.ALM_CRITERIA == "DEV")
+                {
+                    if (!string.IsNullOrEmpty(point.ALM_HIGH_2))
+                    {
+                        alarmList.Add(new IgnitionAlarm()
+                        {
+                            name = point.PT_ID,
+                            mode = "AboveValue",
+                            label = transAlmMsg(point.ALM_MSG),
+                            priority = transAlmClass(point.ALM_CLASS, tag),
+                            setpointA = $"[.]{point.DEVIATION_PT} + {point.ALM_HIGH_2}",
+                            anyChange = point.ALM_UPDATE_VALUE == 1
+                        });
+                    }
+                    if (!string.IsNullOrEmpty(point.ALM_HIGH_1))
+                    {
+                        alarmList.Add(new IgnitionAlarm()
+                        {
+                            name = point.PT_ID,
+                            mode = "AboveValue",
+                            label = transAlmMsg(point.ALM_MSG),
+                            priority = transAlmClass(point.ALM_CLASS, tag),
+                            setpointA = $"[.]{point.DEVIATION_PT} + {point.ALM_HIGH_1}",
+                            anyChange = point.ALM_UPDATE_VALUE == 1
+                        });
+                    }
+                    if (!string.IsNullOrEmpty(point.ALM_LOW_2))
+                    {
+                        alarmList.Add(new IgnitionAlarm()
+                        {
+                            name = point.PT_ID,
+                            mode = "BelowValue",
+                            label = transAlmMsg(point.ALM_MSG),
+                            priority = transAlmClass(point.ALM_CLASS, tag),
+                            setpointA = $"[.]{point.DEVIATION_PT} + {point.ALM_LOW_2}",
+                            anyChange = point.ALM_UPDATE_VALUE == 1
+                        });
+                    }
+                    if (!string.IsNullOrEmpty(point.ALM_LOW_1))
+                    {
+                        alarmList.Add(new IgnitionAlarm()
+                        {
+                            name = point.PT_ID,
+                            mode = "BelowValue",
+                            label = transAlmMsg(point.ALM_MSG),
+                            priority = transAlmClass(point.ALM_CLASS, tag),
+                            setpointA = $"[.]{point.DEVIATION_PT} + {point.ALM_LOW_1}",
+                            anyChange = point.ALM_UPDATE_VALUE == 1
+                        });
+                    }
+                }
+                else if (point.ALM_CRITERIA == "AEQ")
+                {
+                    if (!string.IsNullOrEmpty(point.ALM_HIGH_2))
+                    {
+                        alarmList.Add(new IgnitionAlarm()
+                        {
+                            name = point.PT_ID,
+                            mode = "Equality",
+                            label = transAlmMsg(point.ALM_MSG),
+                            priority = transAlmClass(point.ALM_CLASS, tag),
+                            setpointA = $"{point.ALM_HIGH_2}",
+                            anyChange = point.ALM_UPDATE_VALUE == 1
+                        });
+                    }
+                    if (!string.IsNullOrEmpty(point.ALM_HIGH_1))
+                    {
+                        alarmList.Add(new IgnitionAlarm()
+                        {
+                            name = point.PT_ID,
+                            mode = "Equality",
+                            label = transAlmMsg(point.ALM_MSG),
+                            priority = transAlmClass(point.ALM_CLASS, tag),
+                            setpointA = $"{point.ALM_HIGH_1}",
+                            anyChange = point.ALM_UPDATE_VALUE == 1
+                        });
+                    }
+                    if (!string.IsNullOrEmpty(point.ALM_LOW_2))
+                    {
+                        alarmList.Add(new IgnitionAlarm()
+                        {
+                            name = point.PT_ID,
+                            mode = "Equality",
+                            label = transAlmMsg(point.ALM_MSG),
+                            priority = transAlmClass(point.ALM_CLASS, tag),
+                            setpointA = $"{point.ALM_LOW_2}",
+                            anyChange = point.ALM_UPDATE_VALUE == 1
+                        });
+                    }
+                    if (!string.IsNullOrEmpty(point.ALM_LOW_1))
+                    {
+                        alarmList.Add(new IgnitionAlarm()
+                        {
+                            name = point.PT_ID,
+                            mode = "Equality",
+                            label = transAlmMsg(point.ALM_MSG),
+                            priority = transAlmClass(point.ALM_CLASS, tag),
+                            setpointA = $"{point.ALM_LOW_1}",
+                            anyChange = point.ALM_UPDATE_VALUE == 1
+                        });
+                    }
+                }
+                else if (point.ALM_CRITERIA == "ABS")
+                {
+                    if (point.PT_TYPE == "BOOL")
+                    {
+
+                    }
+                    else
+                    {
+                        if (!string.IsNullOrEmpty(point.ALM_HIGH_2))
+                        {
+                            alarmList.Add(new IgnitionAlarm()
+                            {
+                                name = point.PT_ID,
+                                mode = "AboveValue",
+                                label = transAlmMsg(point.ALM_MSG),
+                                priority = transAlmClass(point.ALM_CLASS, tag),
+                                setpointA = $"{point.ALM_HIGH_2}",
+                                anyChange = point.ALM_UPDATE_VALUE == 1
+                            });
+                        }
+                        if (!string.IsNullOrEmpty(point.ALM_HIGH_1))
+                        {
+                            alarmList.Add(new IgnitionAlarm()
+                            {
+                                name = point.PT_ID,
+                                mode = "AboveValue",
+                                label = transAlmMsg(point.ALM_MSG),
+                                priority = transAlmClass(point.ALM_CLASS, tag),
+                                setpointA = $"{point.ALM_HIGH_1}",
+                                anyChange = point.ALM_UPDATE_VALUE == 1
+                            });
+                        }
+                        if (!string.IsNullOrEmpty(point.ALM_LOW_2))
+                        {
+                            alarmList.Add(new IgnitionAlarm()
+                            {
+                                name = point.PT_ID,
+                                mode = "BelowValue",
+                                label = transAlmMsg(point.ALM_MSG),
+                                priority = transAlmClass(point.ALM_CLASS, tag),
+                                setpointA = $"{point.ALM_LOW_2}",
+                                anyChange = point.ALM_UPDATE_VALUE == 1
+                            });
+                        }
+                        if (!string.IsNullOrEmpty(point.ALM_LOW_1))
+                        {
+                            alarmList.Add(new IgnitionAlarm()
+                            {
+                                name = point.PT_ID,
+                                mode = "BelowValue",
+                                label = transAlmMsg(point.ALM_MSG),
+                                priority = transAlmClass(point.ALM_CLASS, tag),
+                                setpointA = $"{point.ALM_LOW_1}",
+                                anyChange = point.ALM_UPDATE_VALUE == 1
+                            });
+                        }
+                    }
+                }
+                else
+                {
+                    tag.SetConversionError($"Unsupported alarm criteria={point.ALM_CRITERIA}. Edit tag manually.");
+                }
+
+                if (alarmList.Any())
+                {
+                    if (!string.IsNullOrEmpty(point.ALM_DEADBAND) && double.TryParse(point.ANALOG_DEADBAND, out double almdeadband))
+                        alarmList.ForEach((alarm) => alarm.deadband = almdeadband);
+
+                    tag.alarms = alarmList.ToArray();
+                }
+            }
 
             return tag;
         }
 
+        /// <summary>
+        /// Transform alarm class
+        /// </summary>
+        /// <param name="className"></param>
+        /// <param name="tag"></param>
+        /// <returns></returns>
+        private static string transAlmClass(string className, IgnitionTag tag)
+        {
+            switch (className)
+            {
+                case "HIGH":
+                    return "High";
+                case "MED":
+                    return "Medium";
+                case "LOW":
+                    return "Low";
+            }
+
+            if (!(className == "Diagnostic" || className == "Low" || className == "Medium"
+                    || className == "High" || className == "Critical"))
+                tag.SetConversionError($"Alarm class {className} is not supported by Ignition. Edit tag manually.");
+
+            return className;
+        }
+
+        /// <summary>
+        /// Transform alarm message
+        /// </summary>
+        /// <param name="message"></param>
+        /// <returns></returns>
+        private static string transAlmMsg(string message)
+        {
+            return message;
+        }
+
+        /// <summary>
+        /// Evaluate expression
+        /// </summary>
+        /// <param name="calcType"></param>
+        /// <param name="equ"></param>
+        /// <returns></returns>
         private static string evalExpression(string calcType, string equ)
         {
             throw new NotImplementedException();

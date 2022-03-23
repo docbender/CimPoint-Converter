@@ -18,11 +18,13 @@
 namespace CimPointConv
 {
     internal class IgnitionAlarm
-    {
-        public double setpointA { get; set; } //": 1.0,
-        public string mode { get; set; } //": "Equality",
-        public string name { get; set; } //": "Bool alarm",
-        public string label { get; set; } //": "",
-        public string priority { get; set; } //": "Critical"
+    {        
+        public string name { get; set; }
+        public string label { get; set; }
+        public string mode { get; set; }
+        public string priority { get; set; }
+        public string setpointA { get; set; }
+        public bool anyChange { get; set; }
+        public double deadband { get; set; }
     }
 }
