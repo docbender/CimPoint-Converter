@@ -313,13 +313,7 @@ namespace CimPointConv
                     }
                 }
                 else if (point.ALM_CRITERIA == "ABS")
-                {
-                    if (point.PT_TYPE == "BOOL")
-                    {
-
-                    }
-                    else
-                    {
+                {                    
                         if (!string.IsNullOrEmpty(point.ALM_HIGH_2))
                         {
                             alarmList.Add(new IgnitionAlarm()
@@ -367,8 +361,19 @@ namespace CimPointConv
                                 setpointA = $"{point.ALM_LOW_1}",
                                 anyChange = point.ALM_UPDATE_VALUE == 1
                             });
-                        }
-                    }
+                        }                    
+                }
+                else if (point.PT_TYPE == "BOOL")
+                {
+                    alarmList.Add(new IgnitionAlarm()
+                    {
+                        name = point.PT_ID,
+                        mode = "Equality",
+                        label = transAlmMsg(point.ALM_MSG),
+                        priority = transAlmClass(point.ALM_CLASS, tag),
+                        setpointA = $"{point.ALM_HIGH_2}",
+                        anyChange = point.ALM_UPDATE_VALUE == 1
+                    });
                 }
                 else
                 {
