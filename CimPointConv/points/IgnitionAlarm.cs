@@ -26,5 +26,10 @@ namespace CimPointConv
         public string setpointA { get; set; }
         public bool anyChange { get; set; }
         public double deadband { get; set; }
+        public string ackMode { get; set; }
+        public bool enabled { get; set; }
+        public int timeOnDelaySeconds { get; set; }
+        public int timeOffDelaySeconds { get; set; }
+
     }
 }
