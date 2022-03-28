@@ -18,10 +18,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
+using System.Text.RegularExpressions;
 
 namespace CimPointConv
 {
-    internal class IgnitionTag
+    public class IgnitionTag
     {
         public string name { get; private set; }
         public string tagType { get; private set; }
@@ -51,26 +53,55 @@ namespace CimPointConv
 
         private static List<IgnitionAlarm> alarmList = new List<IgnitionAlarm>();
         private string _conversionError;
+        private bool _fatal = false;
 
-        public void SetConversionError(string text)
+        /// <summary>
+        /// Set conversion error
+        /// </summary>
+        /// <param name="text"></param>
+        private void SetConversionError(string text, bool fatal=false)
         {
+            if (fatal)
+                _fatal = true;
             if (string.IsNullOrEmpty(_conversionError))
                 _conversionError = $"{name}: {text}";
             else
                 _conversionError += $"{Environment.NewLine}  {text}";
         }
 
+        /// <summary>
+        /// Return conversion error
+        /// </summary>
+        /// <returns></returns>
         public string GetConversionError()
         {
             return _conversionError;
         }
 
+        /// <summary>
+        /// Error during conversion
+        /// </summary>
+        /// <returns></returns>
         public bool HasConversionError()
         {
             return !string.IsNullOrEmpty(_conversionError);
         }
 
-        internal static IgnitionTag? Create(CimplicityPoint point)
+        /// <summary>
+        /// Error during conversion
+        /// </summary>
+        /// <returns></returns>
+        public bool HasFatalConversionError()
+        {
+            return _fatal;
+        }
+
+        /// <summary>
+        /// Create Ignition tag from Cimplicity point
+        /// </summary>
+        /// <param name="point"></param>
+        /// <returns></returns>
+        internal static IgnitionTag Create(CimplicityPoint point)
         {
             var tag = new IgnitionTag();
 
@@ -89,16 +120,34 @@ namespace CimPointConv
 
                 case "R":
                     tag.valueSource = "expr";
-                    tag.expression = EvalExpression(point.CALC_TYPE, point.EQUATION);
+                    // CALC_TYPE
+                    //   EQU Equation
+                    //   DAC Delta Accumulator
+                    //   VAC Value Accumulator
+                    //   AVG Average
+                    //   MAX Maximum
+                    //   MIN Minimum
+                    //   T_C Timer/ Counter
+                    //   HST Histogram
+                    //   T_H Transition High Accumulator
+                    //   EWO Equation with Override
+                    if (point.CALC_TYPE == "EQU" || point.CALC_TYPE == "EWO")
+                    {
+                        tag.expression = EvalExpression(point.EQUATION, tag);
+                    }
+                    else
+                    {
+                        tag.SetConversionError($"Point calculation type={point.CALC_TYPE} is not supported by Ignition. Edit tag manually.", true);
+                        return tag;
+                    }
                     break;
-
                 case "G":
                     tag.valueSource = "memory";
                     break;
 
                 default:
-                    tag.SetConversionError("Unsupported PT_ORIGIN");
-                    return null;
+                    tag.SetConversionError("Unsupported PT_ORIGIN", true);
+                    return tag;
             }
 
             switch (point.PT_TYPE)
@@ -136,8 +185,8 @@ namespace CimPointConv
                     break;
 
                 default:
-                    tag.SetConversionError($"Unsupported PT_TYPE={point.PT_TYPE}");
-                    return null;
+                    tag.SetConversionError($"Unsupported PT_TYPE={point.PT_TYPE}", true);
+                    return tag;
             }
 
             // numeric properties
@@ -442,6 +491,12 @@ namespace CimPointConv
             return tag;
         }
 
+        /// <summary>
+        /// Transform ack 
+        /// </summary>
+        /// <param name="point"></param>
+        /// <param name="level"></param>
+        /// <returns></returns>
         private static string TransAckMode(CimplicityPoint point, int level = 0)
         {
             string timeout;
@@ -481,7 +536,7 @@ namespace CimPointConv
         }
 
         /// <summary>
-        /// /// Transform alarm on delay
+        /// Transform alarm on delay
         /// </summary>
         /// <param name="point"></param>
         /// <param name="level"></param>
@@ -633,24 +688,270 @@ namespace CimPointConv
         /// <summary>
         /// Evaluate expression
         /// </summary>
-        /// <param name="calcType"></param>
         /// <param name="equ"></param>
+        /// <param name="tag"></param>
         /// <returns></returns>
-        private static string EvalExpression(string calcType, string equ)
+        public static string EvalExpression(string equ, IgnitionTag tag)
         {
-            throw new NotImplementedException();
+            var node = PrepareNode(equ,tag);
+            ReplaceCimPoint(node);
 
-            // CALC_TYPE
-            //   EQU Equation
-            //   DAC Delta Accumulator
-            //   VAC Value Accumulator
-            //   AVG Average
-            //   MAX Maxim
-            //   MIN Minimumum
-            //   T_C Timer/ Counter
-            //   HST Histogram
-            //   T_H Transition High Accumulator
-            //   EWO Equation with Override
+            return node.ToString();
+        }
+
+        static readonly Dictionary<string, string> operators = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) {
+            { "BAND", "&" }, { "AND", "&&" },
+            { "BOR", "|" }, { "OR", "||" },
+            { "BNOT", "~" }, { "BXOR", "xor" },
+            { "SHL", "<<" }, { "SHR", ">>" },
+            { "NOT", "!" }, { "XOR", "xor" },
+        };
+
+        static readonly Dictionary<string, string> functions = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) {
+            { "ABS", "abs" }, { "CEIL", "" },{ "FLR", "floor" },
+            { "MOD", "%" },{ "RND", "round" },{ "SQR", "sqrt" },
+            { "TRUNC", "ceil" },{ "ACOS", "acos" },{ "ASIN", "asin" },{ "ATAN", "atan" },
+            { "COS", "atan" },{ "EXP", "exp" },{ "LOG", "log" },{ "LOG10", "log10" },
+            { "SIN", "sin" },{ "TAN", "tan" },
+        };
+
+        static readonly Dictionary<string, string> comparators = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) {
+            { "EQ", "==" },
+            { "GE", ">=" },
+            { "GT", ">" },
+            { "LE", "<=" },
+            { "LT", "<" },
+            { "NE", "!=" },
+        };
+
+        static readonly char[] glue = { ' ', '+', '-', '*', '/', '^' };
+
+        static readonly Regex operregex = new Regex($"[^0-9a-zA-Z+-\\/*]({string.Join('|', operators.Keys)})[^0-9a-zA-Z+-\\/*]", RegexOptions.IgnoreCase);
+        static readonly Regex fregex = new Regex($"[^0-9a-zA-Z+-\\/*]({string.Join('|', functions.Keys)})[^0-9a-zA-Z+-\\/*]", RegexOptions.IgnoreCase);
+        static readonly Regex compregex = new Regex($"[^0-9a-zA-Z+-\\/*]({string.Join('|', comparators.Keys)})[^0-9a-zA-Z+-\\/*]", RegexOptions.IgnoreCase);
+        static readonly Regex pointRegex = new Regex($"([a-zA-Z][0-9a-zA-Z\\.-_]+)");
+
+        /// <summary>
+        /// Prepare expression as Element object
+        /// </summary>
+        /// <param name="equ"></param>
+        /// <param name="tag"></param>
+        /// <returns></returns>
+        public static Element PrepareNode(string equation, IgnitionTag? tag = null)
+        {
+            // escape square bracket
+            var equ = equation.Replace("[", "\\[").Replace("]", "\\]");
+
+            if (!equ.Contains('('))
+            {
+                var snode = new Element() { Expression = equ };
+                return ReplaceCimFunctions(snode);
+            }
+
+            var node = new Element();
+            int ix = 0, ob = 0, cb = 0, i, level;
+
+            while ((ix = equ.IndexOf('(', ix)) >= 0)
+            {
+                bool isFoo = false;
+                ob = ix;
+
+                if (ix > 0 && !glue.Contains(equ[ix - 1]))
+                {
+                    var space = equ.LastIndexOf(')', ix - 1);
+                    foreach (var ch in glue)
+                        space = Math.Max(space, equ.LastIndexOf(ch, ix - 1));
+
+                    if (space > cb)
+                        node.Expression += equ.Substring(cb, space + 1);
+                    var function = equ.Substring(space + 1, ix - 1 - space);
+                    if (operators.ContainsKey(function))
+                    {
+                        //operator
+                        node.Expression += operators[function] + " (";
+                    }
+                    else if (comparators.ContainsKey(function))
+                    {
+                        //comparator
+                        node.Expression += comparators[function];
+                    }
+                    else
+                    {
+                        //function
+                        if (functions.ContainsKey(function))
+                        {
+                            node.Expression += functions[function] + '(';
+                        }
+                        else
+                        {
+                            node.Expression += function + '(';
+                            tag?.SetConversionError($"Expression contains unsupported function '{function}()'");
+                        }
+                        isFoo = true;
+                    }
+                }
+                else if (ix > 0)
+                {
+                    if (cb == 0)
+                        node.Expression += equ.Substring(cb, ix - cb);
+                    else
+                        node.Expression += equ.Substring(cb + 1, ix - cb - 1);
+                }
+                i = 0;
+                level = 0;
+                while (equ.Length > ix++)
+                {
+                    if (equ[ix] == ')')
+                    {
+                        if (i == 0)
+                        {
+                            cb = ix;
+                            break;
+                        }
+                        else
+                        {
+                            i--;
+                        }
+                    }
+                    else if (equ[ix] == '(')
+                    {
+                        i++;
+                        level++;
+                    }
+                }
+
+                node.Expression += $"[{node.Nodes.Count}]";
+                if (isFoo)
+                    node.Expression += ")";
+
+                node.Nodes.Add(PrepareNode(equ.Substring(ob + 1, cb - ob - 1)));
+            }
+
+            node.Expression += equ.Substring(cb + 1);            
+
+            return ReplaceCimFunctions(node);
+        }
+
+        /// <summary>
+        /// Replace Cimplicity reserved words (functions, operators, comparators)
+        /// </summary>
+        /// <param name="node"></param>
+        /// <returns></returns>
+        private static Element ReplaceCimFunctions(Element node)
+        {
+            Match match = compregex.Match(node.Expression);
+            MatchReplace(node, match, comparators);            
+
+            match = operregex.Match(node.Expression);
+            MatchReplace(node, match, operators);
+
+            match = fregex.Match(node.Expression);
+            MatchReplace(node, match, functions);
+            
+            return node;
+        }
+
+        /// <summary>
+        /// Replace regex matches
+        /// </summary>
+        /// <param name="node"></param>
+        /// <param name="match"></param>
+        /// <param name="replacement"></param>
+        /// <returns></returns>
+        private static Match MatchReplace(Element node, Match match, Dictionary<string,string> replacement)
+        {
+            if (match.Success)
+            {
+                int index, length;
+                var start = 0;
+                var result = "";
+                do
+                {
+                    index = match.Groups[1].Index;
+                    length = match.Groups[1].Length;
+                    result += node.Expression.Substring(start, index - start) + replacement[match.Groups[1].Value];
+                    start = index + length;
+                } while ((match = match.NextMatch()).Success);
+                if (start < node.Expression.Length)
+                    result += node.Expression.Substring(start);
+                node.Expression = result;
+            }
+
+            return match;
+        }
+
+        /// <summary>
+        /// Replace point name with Ignition syntax
+        /// </summary>
+        /// <param name="node"></param>
+        private static void ReplaceCimPoint(Element node)
+        {
+            var match = pointRegex.Match(node.Expression);
+            if (match.Success)
+            {
+                int index, length;
+                var start = 0;
+                var result = "";
+                do
+                {
+                    index = match.Groups[1].Index;
+                    length = match.Groups[1].Length;
+                    if (index + length < node.Expression.Length && node.Expression[index + length] == '(')
+                        continue;
+                    result += node.Expression.Substring(start, index - start) + $"{{[.]{match.Groups[1].Value}}}";
+                    start = index + length;
+                } while ((match = match.NextMatch()).Success);
+                if (start < node.Expression.Length)
+                    result += node.Expression.Substring(start);
+                node.Expression = result;
+            }
+
+            foreach (var n in node.Nodes)
+            {
+                ReplaceCimPoint(n);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Describe expression element closed in brackets
+    /// </summary>
+    public class Element
+    {
+        public List<Element> Nodes { get; } = new List<Element>();
+        public string Expression { get; set; } = "";
+
+        public override string ToString()
+        {
+            Regex regex = new Regex("(\\[(\\d+)\\])");
+            Match match = regex.Match(Expression);
+            if (!match.Success)
+                return Expression;
+
+            int index, length;
+            var start = 0;
+            StringBuilder result = new StringBuilder();
+
+            do
+            {
+                index = match.Groups[1].Index;
+                length = match.Groups[1].Length;
+                if (index > 0 && Expression[index - 1] == '[')
+                    continue;
+                result.Append(Expression.Substring(start, index - start));
+                if(index == 0 || Expression[index - 1]!='(')
+                    result.Append('(').Append(Nodes[int.Parse(match.Groups[2].Value)]).Append(')');
+                else
+                    result.Append(Nodes[int.Parse(match.Groups[2].Value)]);
+                start = index + length;
+            } while ((match = match.NextMatch()).Success);
+
+            if (start < Expression.Length)
+                result.Append(Expression.Substring(start));
+
+            result.Replace("\\[", "[").Replace("\\]", "]");
+
+            return result.ToString();
         }
     }
 }

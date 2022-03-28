@@ -17,7 +17,7 @@
 
 namespace CimPointConv
 {
-    internal class IgnitionAlarm
+    public class IgnitionAlarm
     {        
         public string name { get; set; }
         public string label { get; set; }
