@@ -285,7 +285,7 @@ namespace CimPointConv
 
             if (rbOutClipboard.IsChecked.Value)
             {
-                var result = processor.GetResultAsText(GetTargetFormat());
+                var result = processor.GetResultAsText(GetTargetFormat(),out int err,out _);
                 if (result == null)
                 {
                     Resources["StatusBarColor"] = Brushes.Orange;
@@ -294,11 +294,15 @@ namespace CimPointConv
                 else
                 {
                     Clipboard.SetText(result);
+                    statusBarItem1.Content = "Result put in the clipboard.";
+                    if (err > 0)
+                        statusBarItem1.Content += $" There was {err} conversion errors.";
                 }
             }
             else if (rbOutSource.IsChecked.Value)
             {
                 SaveResult(tbFile.Text, GetTargetFormat());
+                statusBarItem1.Content = "Result saved to the file";
             }
             else if (rbOutAsk.IsChecked.Value)
             {

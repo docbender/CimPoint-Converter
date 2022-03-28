@@ -401,8 +401,10 @@ namespace CimPointConv
         /// </summary>
         /// <param name="format">Target format</param>
         /// <returns>Result in CIMPLICITY text format if points were processed. Otherwise null</returns>
-        public string GetResultAsText(Format format)
+        public string GetResultAsText(Format format, out int errorCount, out string debug)
         {
+            errorCount = 0;
+            debug = string.Empty;
             if (PointsProcesed == null)
             {
                 Exception = new Exception("Run point processing first");
@@ -420,10 +422,16 @@ namespace CimPointConv
                 format = Version;
             }
             else if (format == Format.IGNITION)
-            {                
+            {
                 var iTags = PointsProcesed.Select(x => IgnitionTag.Create(x));
-                int errors = iTags.Count(x => x==null);
-                return IgnitionFolder.ToJson(iTags.Where(x => x!=null));
+                int errors = iTags.Count(x => x.HasConversionError());
+                debug = $"Converted {iTags.Count()} tags with {errors} errors{Environment.NewLine}{new string('-',50)}{Environment.NewLine}";
+                if (errors > 0)
+                {
+                    debug += string.Join(Environment.NewLine, iTags.Where(x => x.HasConversionError()).Select(x => x.GetConversionError()));
+                    errorCount = errors;
+                }
+                return IgnitionFolder.ToJson(iTags.Where(x => !x.HasFatalConversionError()));
             }
             else if (format != Version)
             {
@@ -478,11 +486,13 @@ namespace CimPointConv
         /// <returns></returns>
         public bool Save(string file, Format format)
         {
-            string text = GetResultAsText(format);
+            string text = GetResultAsText(format, out int err, out string debug);
 
             try
             {
                 File.WriteAllText(file, text, (format == Format.IGNITION) ? Encoding.UTF8 : Encoding.GetEncoding(ansi));
+                if(err>0)
+                    File.WriteAllText(Path.Combine(Path.GetDirectoryName(file),"conversion.log"), debug, Encoding.UTF8);
                 return true;
             }
             catch (Exception ex)
