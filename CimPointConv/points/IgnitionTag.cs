@@ -59,14 +59,14 @@ namespace CimPointConv
         /// Set conversion error
         /// </summary>
         /// <param name="text"></param>
-        private void SetConversionError(string text, bool fatal=false)
+        private void SetConversionError(string text, bool fatal = false)
         {
             if (fatal)
                 _fatal = true;
             if (string.IsNullOrEmpty(_conversionError))
-                _conversionError = $"{name}: {text}";
+                _conversionError = $"{name,-20} {(_fatal ? "[ERROR] " : "[WARN]  ")}{text}";
             else
-                _conversionError += $"{Environment.NewLine}  {text}";
+                _conversionError += $"{Environment.NewLine}{' ',-20} {(_fatal ? "[ERROR] " : "[WARN]  ")}{text}";
         }
 
         /// <summary>
@@ -105,7 +105,7 @@ namespace CimPointConv
         {
             var tag = new IgnitionTag();
 
-            tag.name = point.PT_ID;
+            tag.name = point.PT_ID.Replace('.', '_');
             tag.tagType = "AtomicTag";
             tag.enabled = point.PT_ENABLED == 1;
             tag.readOnly = (point.ACCESS == "R");
@@ -141,8 +141,17 @@ namespace CimPointConv
                         return tag;
                     }
                     break;
+
                 case "G":
                     tag.valueSource = "memory";
+                    break;
+
+                case "I":
+                    tag.SetConversionError("Device Internal Point is not supported", true);
+                    break;
+
+                case "A":
+                    tag.SetConversionError("Device Always Poll Point is not supported", true);
                     break;
 
                 default:
@@ -264,7 +273,7 @@ namespace CimPointConv
                 {
                     alarmList.Add(new IgnitionAlarm()
                     {
-                        name = point.PT_ID,
+                        name = point.PT_ID.Replace('.', '_'),
                         mode = "AnyChange",
                         label = TransAlmMsg(point.ALM_MSG),
                         priority = TransAlmClass(point.ALM_CLASS, tag),
@@ -279,7 +288,7 @@ namespace CimPointConv
                     {
                         alarmList.Add(new IgnitionAlarm()
                         {
-                            name = point.PT_ID,
+                            name = point.PT_ID.Replace('.', '_'),
                             mode = "AboveValue",
                             label = TransAlmMsg(point.ALM_MSG),
                             priority = TransAlmClass(point.ALM_CLASS, tag),
@@ -293,7 +302,7 @@ namespace CimPointConv
                     {
                         alarmList.Add(new IgnitionAlarm()
                         {
-                            name = point.PT_ID,
+                            name = point.PT_ID.Replace('.', '_'),
                             mode = "AboveValue",
                             label = TransAlmMsg(point.ALM_MSG),
                             priority = TransAlmClass(point.ALM_CLASS, tag),
@@ -307,7 +316,7 @@ namespace CimPointConv
                     {
                         alarmList.Add(new IgnitionAlarm()
                         {
-                            name = point.PT_ID,
+                            name = point.PT_ID.Replace('.', '_'),
                             mode = "BelowValue",
                             label = TransAlmMsg(point.ALM_MSG),
                             priority = TransAlmClass(point.ALM_CLASS, tag),
@@ -321,7 +330,7 @@ namespace CimPointConv
                     {
                         alarmList.Add(new IgnitionAlarm()
                         {
-                            name = point.PT_ID,
+                            name = point.PT_ID.Replace('.', '_'),
                             mode = "BelowValue",
                             label = TransAlmMsg(point.ALM_MSG),
                             priority = TransAlmClass(point.ALM_CLASS, tag),
@@ -338,7 +347,7 @@ namespace CimPointConv
                     {
                         alarmList.Add(new IgnitionAlarm()
                         {
-                            name = point.PT_ID,
+                            name = point.PT_ID.Replace('.', '_'),
                             mode = "Equality",
                             label = TransAlmMsg(point.ALM_MSG),
                             priority = TransAlmClass(point.ALM_CLASS, tag),
@@ -352,7 +361,7 @@ namespace CimPointConv
                     {
                         alarmList.Add(new IgnitionAlarm()
                         {
-                            name = point.PT_ID,
+                            name = point.PT_ID.Replace('.', '_'),
                             mode = "Equality",
                             label = TransAlmMsg(point.ALM_MSG),
                             priority = TransAlmClass(point.ALM_CLASS, tag),
@@ -366,7 +375,7 @@ namespace CimPointConv
                     {
                         alarmList.Add(new IgnitionAlarm()
                         {
-                            name = point.PT_ID,
+                            name = point.PT_ID.Replace('.', '_'),
                             mode = "Equality",
                             label = TransAlmMsg(point.ALM_MSG),
                             priority = TransAlmClass(point.ALM_CLASS, tag),
@@ -380,7 +389,7 @@ namespace CimPointConv
                     {
                         alarmList.Add(new IgnitionAlarm()
                         {
-                            name = point.PT_ID,
+                            name = point.PT_ID.Replace('.', '_'),
                             mode = "Equality",
                             label = TransAlmMsg(point.ALM_MSG),
                             priority = TransAlmClass(point.ALM_CLASS, tag),
@@ -397,7 +406,7 @@ namespace CimPointConv
                     {
                         alarmList.Add(new IgnitionAlarm()
                         {
-                            name = point.PT_ID,
+                            name = point.PT_ID.Replace('.', '_'),
                             mode = "AboveValue",
                             label = TransAlmMsg(point.ALM_MSG),
                             priority = TransAlmClass(point.ALM_CLASS, tag),
@@ -411,7 +420,7 @@ namespace CimPointConv
                     {
                         alarmList.Add(new IgnitionAlarm()
                         {
-                            name = point.PT_ID,
+                            name = point.PT_ID.Replace('.', '_'),
                             mode = "AboveValue",
                             label = TransAlmMsg(point.ALM_MSG),
                             priority = TransAlmClass(point.ALM_CLASS, tag),
@@ -425,7 +434,7 @@ namespace CimPointConv
                     {
                         alarmList.Add(new IgnitionAlarm()
                         {
-                            name = point.PT_ID,
+                            name = point.PT_ID.Replace('.', '_'),
                             mode = "BelowValue",
                             label = TransAlmMsg(point.ALM_MSG),
                             priority = TransAlmClass(point.ALM_CLASS, tag),
@@ -439,7 +448,7 @@ namespace CimPointConv
                     {
                         alarmList.Add(new IgnitionAlarm()
                         {
-                            name = point.PT_ID,
+                            name = point.PT_ID.Replace('.', '_'),
                             mode = "BelowValue",
                             label = TransAlmMsg(point.ALM_MSG),
                             priority = TransAlmClass(point.ALM_CLASS, tag),
@@ -454,7 +463,7 @@ namespace CimPointConv
                 {
                     alarmList.Add(new IgnitionAlarm()
                     {
-                        name = point.PT_ID,
+                        name = point.PT_ID.Replace('.', '_'),
                         mode = "Equality",
                         label = TransAlmMsg(point.ALM_MSG),
                         priority = TransAlmClass(point.ALM_CLASS, tag),
@@ -492,7 +501,7 @@ namespace CimPointConv
         }
 
         /// <summary>
-        /// Transform ack 
+        /// Transform ack
         /// </summary>
         /// <param name="point"></param>
         /// <param name="level"></param>
@@ -693,13 +702,13 @@ namespace CimPointConv
         /// <returns></returns>
         public static string EvalExpression(string equ, IgnitionTag tag)
         {
-            var node = PrepareNode(equ,tag);
+            var node = PrepareNode(equ, tag);
             ReplaceCimPoint(node);
 
             return node.ToString();
         }
 
-        static readonly Dictionary<string, string> operators = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) {
+        private static readonly Dictionary<string, string> operators = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) {
             { "BAND", "&" }, { "AND", "&&" },
             { "BOR", "|" }, { "OR", "||" },
             { "BNOT", "~" }, { "BXOR", "xor" },
@@ -707,7 +716,7 @@ namespace CimPointConv
             { "NOT", "!" }, { "XOR", "xor" },
         };
 
-        static readonly Dictionary<string, string> functions = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) {
+        private static readonly Dictionary<string, string> functions = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) {
             { "ABS", "abs" }, { "CEIL", "" },{ "FLR", "floor" },
             { "MOD", "%" },{ "RND", "round" },{ "SQR", "sqrt" },
             { "TRUNC", "ceil" },{ "ACOS", "acos" },{ "ASIN", "asin" },{ "ATAN", "atan" },
@@ -715,7 +724,7 @@ namespace CimPointConv
             { "SIN", "sin" },{ "TAN", "tan" },
         };
 
-        static readonly Dictionary<string, string> comparators = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) {
+        private static readonly Dictionary<string, string> comparators = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) {
             { "EQ", "==" },
             { "GE", ">=" },
             { "GT", ">" },
@@ -724,12 +733,14 @@ namespace CimPointConv
             { "NE", "!=" },
         };
 
-        static readonly char[] glue = { ' ', '+', '-', '*', '/', '^' };
+        private static readonly char[] glue = { ' ', '+', '-', '*', '/', '^' };
 
-        static readonly Regex operregex = new Regex($"[^0-9a-zA-Z+-\\/*]({string.Join('|', operators.Keys)})[^0-9a-zA-Z+-\\/*]", RegexOptions.IgnoreCase);
-        static readonly Regex fregex = new Regex($"[^0-9a-zA-Z+-\\/*]({string.Join('|', functions.Keys)})[^0-9a-zA-Z+-\\/*]", RegexOptions.IgnoreCase);
-        static readonly Regex compregex = new Regex($"[^0-9a-zA-Z+-\\/*]({string.Join('|', comparators.Keys)})[^0-9a-zA-Z+-\\/*]", RegexOptions.IgnoreCase);
-        static readonly Regex pointRegex = new Regex($"([a-zA-Z][0-9a-zA-Z\\.-_]+)");
+        private static readonly Regex operregex = new Regex($"[^0-9a-zA-Z+-\\/*]({string.Join('|', operators.Keys)})[^0-9a-zA-Z+-\\/*]", RegexOptions.IgnoreCase);
+        private static readonly Regex fregex = new Regex($"[^0-9a-zA-Z+-\\/*]({string.Join('|', functions.Keys)})[^0-9a-zA-Z+-\\/*]", RegexOptions.IgnoreCase);
+        private static readonly Regex compregex = new Regex($"[^0-9a-zA-Z+-\\/*]({string.Join('|', comparators.Keys)})[^0-9a-zA-Z+-\\/*]", RegexOptions.IgnoreCase);
+        private static readonly Regex pointRegex = new Regex($"([a-zA-Z][0-9a-zA-Z\\.-_]+)");
+
+#nullable enable
 
         /// <summary>
         /// Prepare expression as Element object
@@ -793,9 +804,9 @@ namespace CimPointConv
                 else if (ix > 0)
                 {
                     if (cb == 0)
-                        node.Expression += equ.Substring(cb, ix - cb);
+                        node.Expression += equ[cb..ix];
                     else
-                        node.Expression += equ.Substring(cb + 1, ix - cb - 1);
+                        node.Expression += equ[(cb + 1)..ix];
                 }
                 i = 0;
                 level = 0;
@@ -827,7 +838,7 @@ namespace CimPointConv
                 node.Nodes.Add(PrepareNode(equ.Substring(ob + 1, cb - ob - 1)));
             }
 
-            node.Expression += equ.Substring(cb + 1);            
+            node.Expression += equ.Substring(cb + 1);
 
             return ReplaceCimFunctions(node);
         }
@@ -840,14 +851,14 @@ namespace CimPointConv
         private static Element ReplaceCimFunctions(Element node)
         {
             Match match = compregex.Match(node.Expression);
-            MatchReplace(node, match, comparators);            
+            MatchReplace(node, match, comparators);
 
             match = operregex.Match(node.Expression);
             MatchReplace(node, match, operators);
 
             match = fregex.Match(node.Expression);
             MatchReplace(node, match, functions);
-            
+
             return node;
         }
 
@@ -858,7 +869,7 @@ namespace CimPointConv
         /// <param name="match"></param>
         /// <param name="replacement"></param>
         /// <returns></returns>
-        private static Match MatchReplace(Element node, Match match, Dictionary<string,string> replacement)
+        private static Match MatchReplace(Element node, Match match, Dictionary<string, string> replacement)
         {
             if (match.Success)
             {
@@ -869,7 +880,7 @@ namespace CimPointConv
                 {
                     index = match.Groups[1].Index;
                     length = match.Groups[1].Length;
-                    result += node.Expression.Substring(start, index - start) + replacement[match.Groups[1].Value];
+                    result += string.Concat(node.Expression.AsSpan(start, index - start), replacement[match.Groups[1].Value]);
                     start = index + length;
                 } while ((match = match.NextMatch()).Success);
                 if (start < node.Expression.Length)
@@ -898,7 +909,7 @@ namespace CimPointConv
                     length = match.Groups[1].Length;
                     if (index + length < node.Expression.Length && node.Expression[index + length] == '(')
                         continue;
-                    result += node.Expression.Substring(start, index - start) + $"{{[.]{match.Groups[1].Value}}}";
+                    result += string.Concat(node.Expression.AsSpan(start, index - start), $"{{[.]{match.Groups[1].Value.Replace('.', '_')}}}");
                     start = index + length;
                 } while ((match = match.NextMatch()).Success);
                 if (start < node.Expression.Length)
@@ -938,8 +949,8 @@ namespace CimPointConv
                 length = match.Groups[1].Length;
                 if (index > 0 && Expression[index - 1] == '[')
                     continue;
-                result.Append(Expression.Substring(start, index - start));
-                if(index == 0 || Expression[index - 1]!='(')
+                result.Append(Expression.AsSpan(start, index - start));
+                if (index == 0 || Expression[index - 1] != '(')
                     result.Append('(').Append(Nodes[int.Parse(match.Groups[2].Value)]).Append(')');
                 else
                     result.Append(Nodes[int.Parse(match.Groups[2].Value)]);
