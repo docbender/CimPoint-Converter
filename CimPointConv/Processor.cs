@@ -17,13 +17,13 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.IO;
-using System.Text.RegularExpressions;
 using System.ComponentModel;
+using System.IO;
+using System.Linq;
 using System.Reflection;
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 
 namespace CimPointConv
 {
@@ -31,12 +31,16 @@ namespace CimPointConv
     {
         /// <summary> Line splited values </summary>
         private readonly List<string> _values = new List<string>(160);
+
         /// <summary> Text version representation </summary>
         private string _versionText = "-";
+
         /// <summary> Process exception </summary>
         public Exception Exception { get; private set; }
+
         /// <summary> Source points </summary>
         public List<CimplicityPoint> Points { get; } = new List<CimplicityPoint>(1000);
+
         /// <summary> Processed points </summary>
         public CimplicityPoint[] PointsProcesed;
 
@@ -115,7 +119,6 @@ namespace CimPointConv
         /// <returns></returns>
         public async Task<bool> Load(string file)
         {
-
 #if DEBUG
             Console.WriteLine($"Opening file {file}...");
 #endif
@@ -192,7 +195,6 @@ namespace CimPointConv
                                     break;
 
                                 point.SetColumn(_columnNames[j], values.ElementAt(j));
-
                             }
 
                             Points.Add(point);
@@ -230,6 +232,8 @@ namespace CimPointConv
         /// <returns></returns>
         public async Task<bool> Process(ProcessorOptions options)
         {
+            Exception = null;
+
             return await Task.Run(() =>
             {
                 FilterPoints(options);
@@ -425,7 +429,7 @@ namespace CimPointConv
             {
                 var iTags = PointsProcesed.Select(x => IgnitionTag.Create(x));
                 int errors = iTags.Count(x => x.HasConversionError());
-                debug = $"Converted {iTags.Count()} tags with {errors} errors{Environment.NewLine}{new string('-',50)}{Environment.NewLine}";
+                debug = $"Converted {iTags.Count() - iTags.Count(x => x.HasFatalConversionError())}/{iTags.Count()} tags with {errors} errors{Environment.NewLine}{new string('-', 50)}{Environment.NewLine}";
                 if (errors > 0)
                 {
                     debug += string.Join(Environment.NewLine, iTags.Where(x => x.HasConversionError()).Select(x => x.GetConversionError()));
@@ -452,15 +456,19 @@ namespace CimPointConv
                 case Format.CIM75:
                     properties = typeof(CimplicityPoint75).GetProperties().Where(x => !x.Name.Equals("PT_ID")).OrderBy(x => x.Name).ToArray();
                     break;
+
                 case Format.CIM82:
                     properties = typeof(CimplicityPoint82).GetProperties().Where(x => !x.Name.Equals("PT_ID")).OrderBy(x => x.Name).ToArray();
                     break;
+
                 case Format.CIM95:
                     properties = typeof(CimplicityPoint95).GetProperties().Where(x => !x.Name.Equals("PT_ID")).OrderBy(x => x.Name).ToArray();
                     break;
+
                 case Format.CIM115:
                     properties = typeof(CimplicityPoint115).GetProperties().Where(x => !x.Name.Equals("PT_ID")).OrderBy(x => x.Name).ToArray();
                     break;
+
                 default:
                     Exception = new Exception("Unsupported CIMPLICITY output format");
                     return null;
@@ -486,13 +494,19 @@ namespace CimPointConv
         /// <returns></returns>
         public bool Save(string file, Format format)
         {
+            if (PointsProcesed == null)
+            {
+                Exception = new Exception("Run point processing first");
+                return false;
+            }
+
             string text = GetResultAsText(format, out int err, out string debug);
 
             try
             {
                 File.WriteAllText(file, text, (format == Format.IGNITION) ? Encoding.UTF8 : Encoding.GetEncoding(ansi));
-                if(err>0)
-                    File.WriteAllText(Path.Combine(Path.GetDirectoryName(file),"conversion.log"), debug, Encoding.UTF8);
+                if (err > 0)
+                    File.WriteAllText(Path.Combine(Path.GetDirectoryName(file), "conversion.log"), debug, Encoding.UTF8);
                 return true;
             }
             catch (Exception ex)
@@ -526,7 +540,7 @@ namespace CimPointConv
                     }
 
                     //yield return line.Substring(pos, i - pos);
-                    _values.Add(line.Substring(pos, i - pos + 1));
+                    _values.Add(line[pos..(i + 1)]);
                     inQuota = false;
                     while (++i < line.Length && !line[i].Equals(',')) ;
                     pos = i + 1;
@@ -535,7 +549,7 @@ namespace CimPointConv
                 {
                     if (inQuota)
                         continue;
-                    text = line.Substring(pos, i - pos);
+                    text = line[pos..i];
                     pos = i + 1;
                     //yield return text;
                     _values.Add(text);
@@ -579,6 +593,7 @@ namespace CimPointConv
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
+
         protected void OnPropertyChanged(string strPropertyName)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(strPropertyName));
