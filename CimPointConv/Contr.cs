@@ -107,7 +107,7 @@ namespace CimPointConv
             if (options.PrintPointsCount)
                 Console.WriteLine($"Processed {p.PointsProcessedCount}/{p.PointsCount} points");
 
-            if (p.Save(options.OutputFile, options.OutputFormat))
+            if (p.Save(options.OutputFile, options.OutputFormat).Result)
             {
                 Console.WriteLine($"Data saved into file {options.OutputFile}");
             }

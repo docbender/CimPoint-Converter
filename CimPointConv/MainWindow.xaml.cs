@@ -301,25 +301,25 @@ namespace CimPointConv
             }
             else if (rbOutSource.IsChecked.Value)
             {
-                SaveResult(tbFile.Text, GetTargetFormat());
+                await SaveResult(tbFile.Text, GetTargetFormat());
                 statusBarItem1.Content = "Result saved to the file";
             }
             else if (rbOutAsk.IsChecked.Value)
             {
-                SaveResultAs();
+                await SaveResultAs();
             }
 
             Working = false;
         }
 
-        private void btnSave_Click(object sender, RoutedEventArgs e)
+        private async void btnSave_Click(object sender, RoutedEventArgs e)
         {
-            SaveResultAs();
+            await SaveResultAs();         
         }
 
-        private void SaveResult(string fileName, Format format)
+        private async Task SaveResult(string fileName, Format format)
         {
-            if (!processor.Save(fileName, format))
+            if (! await processor.Save(fileName, format))
             {
                 Resources["StatusBarColor"] = Brushes.Orange;
                 statusBarItem1.Content = processor.Exception.Message;
@@ -331,7 +331,7 @@ namespace CimPointConv
             }
         }
 
-        private void SaveResultAs()
+        private async Task SaveResultAs()
         {
             var format = GetTargetFormat();
             SaveFileDialog dlg = new();
@@ -343,7 +343,9 @@ namespace CimPointConv
 
             if (dlg.ShowDialog().Value)
             {
-                SaveResult(dlg.FileName, format);
+                Working = true;
+                await SaveResult(dlg.FileName, format);
+                Working = false;
             }
         }
 

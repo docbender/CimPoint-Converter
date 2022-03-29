@@ -492,28 +492,30 @@ namespace CimPointConv
         /// <param name="file"></param>
         /// <param name="format"></param>
         /// <returns></returns>
-        public bool Save(string file, Format format)
+        public async Task<bool> Save(string file, Format format)
         {
-            if (PointsProcesed == null)
+            return await Task.Run(() =>
             {
-                Exception = new Exception("Run point processing first");
-                return false;
-            }
+                if (PointsProcesed == null)
+                {
+                    Exception = new Exception("Run point processing first");
+                    return false;
+                }
+                string text = GetResultAsText(format, out int err, out string debug);
 
-            string text = GetResultAsText(format, out int err, out string debug);
-
-            try
-            {
-                File.WriteAllText(file, text, (format == Format.IGNITION) ? Encoding.UTF8 : Encoding.GetEncoding(ansi));
-                if (err > 0)
-                    File.WriteAllText(Path.Combine(Path.GetDirectoryName(file), "conversion.log"), debug, Encoding.UTF8);
-                return true;
-            }
-            catch (Exception ex)
-            {
-                Exception = ex;
-                return false;
-            }
+                try
+                {
+                    File.WriteAllText(file, text, (format == Format.IGNITION) ? Encoding.UTF8 : Encoding.GetEncoding(ansi));
+                    if (err > 0)
+                        File.WriteAllText(Path.Combine(Path.GetDirectoryName(file), "conversion.log"), debug, Encoding.UTF8);
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    Exception = ex;
+                    return false;
+                }
+            });
         }
 
         /// <summary>
