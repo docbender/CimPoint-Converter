@@ -12,7 +12,7 @@ The tool provides batch CIMPLICITY points transformations as well as conversion 
 - Convert into different CIMPLICITY version
 - Disable alarms
 - Enable/Disable data log, read only, poll after set,...
-- Convert CIMPTICITY points to the Ignition tags
+- Convert CIMPLICITY points to the Ignition tags
 
 ![App preview](/images/screenshot.png)
 
