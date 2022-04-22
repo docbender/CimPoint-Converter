@@ -304,9 +304,13 @@ namespace CimPointConv
                 await SaveResult(tbFile.Text, GetTargetFormat());
                 statusBarItem1.Content = "Result saved to the file";
             }
-            else if (rbOutAsk.IsChecked.Value)
+            else if (rbOutNew.IsChecked.Value)
             {
-                await SaveResultAs();
+                var filename = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(tbFile.Text),
+                    $"{System.IO.Path.GetFileNameWithoutExtension(tbFile.Text)}_{DateTime.Now:yyMMdd-HHmmss}{System.IO.Path.GetExtension(tbFile.Text)}");
+                    
+                await SaveResult(filename, GetTargetFormat());
+                statusBarItem1.Content = "Result saved to the file";
             }
 
             Working = false;

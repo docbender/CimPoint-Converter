@@ -259,11 +259,11 @@
                 <CheckBox x:Name="cbIgnition" Style="{StaticResource cbStyle}" Content="Convert to Ignition" Margin="5,5,0,5" IsChecked="{Binding IsCheckedIgnition}"/>
                 <Label Style="{StaticResource labelStyle}"  Content="Save result:" Padding="5,5,0,0"/>
                 <StackPanel Orientation="Vertical" Margin="20,5,0,0">
-                    <RadioButton x:Name="rbOutSource" Style="{StaticResource rbStyle}" Content="Source file replace" GroupName="out"/>
-                    <RadioButton x:Name="rbOutAsk" Style="{StaticResource rbStyle}" Content="Ask for new file when finished" GroupName="out"/>
+                    <RadioButton x:Name="rbOutNew" Style="{StaticResource rbStyle}" Content="New file to source folder" GroupName="out" IsChecked="True"/>
+                    <RadioButton x:Name="rbOutSource" Style="{StaticResource rbStyle}" Content="Source file replace" GroupName="out"/>                    
                     <RadioButton x:Name="rbOutClipboard" Style="{StaticResource rbStyle}" Content="Clipboard" GroupName="out"/>
                     <StackPanel Orientation="Horizontal" >
-                        <RadioButton x:Name="rbOutManual" Style="{StaticResource rbStyle}" Content="Manually" GroupName="out" IsChecked="True" />
+                        <RadioButton x:Name="rbOutManual" Style="{StaticResource rbStyle}" Content="Manually" GroupName="out" />
                         <Button x:Name="btnSave" HorizontalAlignment="Center" Margin="20,0,0,5" IsEnabled="{Binding ElementName=rbOutManual, Path=IsChecked}" Click="btnSave_Click" >
                             <StackPanel Orientation="Horizontal">
                                 <Image Height="16" Width="16" Source="resources/save.png" Margin="2,2,10,2" />
