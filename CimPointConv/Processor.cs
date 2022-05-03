@@ -310,19 +310,27 @@ namespace CimPointConv
                             {
                                 p2u.RESET_COND = "IN";
                                 p2u.INIT_VAL = "0";
+                                if (p2u.PT_ORIGIN == "G")
+                                    p2u.PROC_ID = "";
                             }
                             else if (options.InitVirtualMode == ProcessorOptions.InitializationMode.None)
                             {
                                 p2u.RESET_COND = "UN";
+                                if (p2u.PT_ORIGIN == "G")
+                                    p2u.PROC_ID = "";
                             }
                             else if (options.InitVirtualMode == ProcessorOptions.InitializationMode.Saved)
                             {
                                 p2u.RESET_COND = "SA";
+                                if(string.IsNullOrEmpty(p2u.PROC_ID))
+                                    p2u.PROC_ID = "MASTER_PTDP_RP";
                             }
                             else if (options.InitVirtualMode == ProcessorOptions.InitializationMode.SavedOrInit)
                             {
                                 p2u.RESET_COND = "SI";
                                 p2u.INIT_VAL = "0";
+                                if (string.IsNullOrEmpty(p2u.PROC_ID))
+                                    p2u.PROC_ID = "MASTER_PTDP_RP";
                             }
                         }
                     }
