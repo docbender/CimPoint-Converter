@@ -545,15 +545,10 @@ namespace CimPointConv
                     if (!inQuota)
                     {
                         inQuota = true;
-                        pos = i;
                         continue;
                     }
 
-                    //yield return line.Substring(pos, i - pos);
-                    _values.Add(line[pos..(i + 1)]);
                     inQuota = false;
-                    while (++i < line.Length && !line[i].Equals(',')) ;
-                    pos = i + 1;
                 }
                 else if (line[i].Equals(','))
                 {
@@ -561,11 +556,9 @@ namespace CimPointConv
                         continue;
                     text = line[pos..i];
                     pos = i + 1;
-                    //yield return text;
                     _values.Add(text);
                 }
             }
-            //yield return line.Substring(pos);
             _values.Add(line.Substring(pos));
 
             return _values;
