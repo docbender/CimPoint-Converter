@@ -15,13 +15,18 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Configuration.Json;
 using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Text.Json;
+using System.Text.Json.Nodes;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -32,6 +37,8 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Xml;
+using static CimPointConv.ProcessorOptions;
 
 namespace CimPointConv
 {
@@ -42,8 +49,9 @@ namespace CimPointConv
     {
         public Processor processor { get; } = new();
         private bool _working = false;
-
-
+        private string _configPath = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "CimPointConverter");
+        private readonly string _configFile = "settings.json";
+        private readonly IConfiguration _config;
         private readonly SolidColorBrush _statusbarcolor;
 
         public MainWindow()
@@ -52,6 +60,165 @@ namespace CimPointConv
 
             DataContext = this;
             _statusbarcolor = (SolidColorBrush)Resources["StatusBarColor"];
+
+            if (!Directory.Exists(_configPath))
+            {
+                try
+                {
+                    Directory.CreateDirectory(_configPath);
+                }
+                catch (Exception ex)
+                {
+                    Resources["StatusBarColor"] = Brushes.Orange;
+                    statusBarItem1.Content = ex.Message;
+                    _configPath = Directory.GetCurrentDirectory();
+                }
+            }
+
+            // get setting
+            _config = new ConfigurationBuilder()
+                .SetBasePath(_configPath)
+                .AddJsonFile(_configFile, true, false)
+                .Build();
+
+            #region UI setting
+
+            var file = _config.GetSection("InputFile").Value;
+            if (!string.IsNullOrEmpty(file) && File.Exists(file))            
+                tbFile.Text = file;            
+            tbFilterPoint.Text = _config.GetSection("FilterPoint").Value;
+            tbFilterAddress.Text = _config.GetSection("FilterAddress").Value;
+            tbFilterDevice.Text = _config.GetSection("FilterDevice").Value;
+            if (bool.TrueString == _config.GetSection("FilterUseRegex").Value)
+                cbFilterRegex.IsChecked = true;
+            tbRenameFromDevice.Text = _config.GetSection("RenameDeviceMask").Value;
+            tbRenameToDevice.Text = _config.GetSection("RenameDeviceTo").Value;
+            tbRenameFromAddress.Text = _config.GetSection("RenameAddressMask").Value;
+            tbRenameToAddress.Text = _config.GetSection("RenameAddressTo").Value;
+            tbRenameFromPoint.Text = _config.GetSection("RenamePointMask").Value;
+            tbRenameToPoint.Text = _config.GetSection("RenamePointTo").Value;
+            if (bool.TrueString == _config.GetSection("RenameUseRegex").Value)
+                cbRenameRegex.IsChecked = true;
+            if (bool.TrueString == _config.GetSection("ConvertToVirtual").Value)
+                cbToVirtual.IsChecked = true;
+            if (bool.TrueString == _config.GetSection("DisableAlarm").Value)
+                cbAlarmDisable.IsChecked = true;
+
+            SetProperty set;
+            if (Enum.TryParse<SetProperty>(_config.GetSection("EnableEnterprise").Value, out set))
+            {
+                if (set == SetProperty.Enable)
+                {
+                    cbEnterprise.IsChecked = true;
+                    rbE8eEnable.IsChecked = true;
+                }
+                else if (set == SetProperty.Disable)
+                {
+                    cbEnterprise.IsChecked = true;
+                    rbE8eDisable.IsChecked = true;
+                }
+            }
+            if (Enum.TryParse<SetProperty>(_config.GetSection("EnablePoint").Value, out set))
+            {
+                if (set == SetProperty.Enable)
+                {
+                    cbEnablePoint.IsChecked = true;
+                    rbPointEnable.IsChecked = true;
+                }
+                else if (set == SetProperty.Disable)
+                {
+                    cbEnablePoint.IsChecked = true;
+                    rbPointDisable.IsChecked = true;
+                }
+            }
+            if (Enum.TryParse<SetProperty>(_config.GetSection("LogData").Value, out set))
+            {
+                if (set == SetProperty.Enable)
+                {
+                    cbLogPoint.IsChecked = true;
+                    rbLogEnable.IsChecked = true;
+                }
+                else if (set == SetProperty.Disable)
+                {
+                    cbLogPoint.IsChecked = true;
+                    rbLogDisable.IsChecked = true;
+                }
+            }
+            if (Enum.TryParse<SetProperty>(_config.GetSection("PollAfterSet").Value, out set))
+            {
+                if (set == SetProperty.Enable)
+                {
+                    cbPoll.IsChecked = true;
+                    rbPollSet.IsChecked = true;
+                }
+                else if (set == SetProperty.Disable)
+                {
+                    cbPoll.IsChecked = true;
+                    rbPollReset.IsChecked = true;
+                }
+            }
+            if (Enum.TryParse<SetProperty>(_config.GetSection("ReadOnly").Value, out set))
+            {
+                if (set == SetProperty.Enable)
+                {
+                    cbReadOnly.IsChecked = true;
+                    rbRoEnable.IsChecked = true;
+                }
+                else if (set == SetProperty.Disable)
+                {
+                    cbReadOnly.IsChecked = true;
+                    rbRoDisable.IsChecked = true;
+                }
+            }
+            if (Enum.TryParse<InitializationMode>(_config.GetSection("InitVirtualMode").Value, out InitializationMode initialization))
+            {
+                if (initialization != InitializationMode.NotSet)
+                {
+                    cbInit.IsChecked = true;
+                    cbxInit.SelectedIndex = (int)initialization;
+                }
+            }
+            if (Enum.TryParse<Format>(_config.GetSection("SaveTo").Value, out Format format))
+            {
+                switch (format)
+                {
+                    case Format.CIM75:
+                        IsCheckedCimplicity = true;
+                        rbSevenFive.IsChecked = true;
+                        break;
+                    case Format.CIM82:
+                        IsCheckedCimplicity = true;
+                        rbEightTwo.IsChecked = true;
+                        break;
+                    case Format.CIM95:
+                        IsCheckedCimplicity = true;
+                        rbNineFive.IsChecked = true;
+                        break;
+                    case Format.CIM115:
+                        IsCheckedCimplicity = true;
+                        rbElevenFive.IsChecked = true;
+                        break;
+                    case Format.IGNITION:
+                        IsCheckedIgnition = true;
+                        break;
+                }
+            }
+            switch (_config.GetSection("SaveOption").Value)
+            {
+                case "1":
+                    rbOutNew.IsChecked = true;
+                    break;
+                case "2":
+                    rbOutSource.IsChecked = true;
+                    break;
+                case "3":
+                    rbOutClipboard.IsChecked = true;
+                    break;
+                case "4":
+                    rbOutManual.IsChecked = true;
+                    break;
+            }
+            #endregion
         }
 
         public bool Working
@@ -180,13 +347,18 @@ namespace CimPointConv
 
         private async void btnOpen_Click(object sender, RoutedEventArgs e)
         {
-            OpenFileDialog dlg = new();
-            dlg.Title = "Open input file...";
-            dlg.Filter = "Text files (*.txt,*.csv)|*.txt;*.csv|All files (*.*)|*.*";
+            OpenFileDialog dlg = new()
+            {
+                Title = "Open input file...",
+                Filter = "Text files (*.txt,*.csv)|*.txt;*.csv|All files (*.*)|*.*",
+                InitialDirectory = _config.GetSection("RecentDir").Value
+            };
 
             if (!dlg.ShowDialog().Value)
                 return;
             await Load(dlg.FileName);
+            _config.GetSection("RecentDir").Value = System.IO.Path.GetDirectoryName(dlg.FileName);
+            _config.GetSection("InputFile").Value = dlg.FileName;
         }
 
         private async Task Load(string file)
@@ -285,7 +457,7 @@ namespace CimPointConv
 
             if (rbOutClipboard.IsChecked.Value)
             {
-                var result = processor.GetResultAsText(GetTargetFormat(),out int err,out _);
+                var result = processor.GetResultAsText(GetTargetFormat(), out int err, out _);
                 if (result == null)
                 {
                     Resources["StatusBarColor"] = Brushes.Orange;
@@ -308,7 +480,7 @@ namespace CimPointConv
             {
                 var filename = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(tbFile.Text),
                     $"{System.IO.Path.GetFileNameWithoutExtension(tbFile.Text)}_{DateTime.Now:yyMMdd-HHmmss}{System.IO.Path.GetExtension(tbFile.Text)}");
-                    
+
                 await SaveResult(filename, GetTargetFormat());
                 statusBarItem1.Content = "Result saved to the file";
             }
@@ -318,12 +490,12 @@ namespace CimPointConv
 
         private async void btnSave_Click(object sender, RoutedEventArgs e)
         {
-            await SaveResultAs();         
+            await SaveResultAs();
         }
 
         private async Task SaveResult(string fileName, Format format)
         {
-            if (! await processor.Save(fileName, format))
+            if (!await processor.Save(fileName, format))
             {
                 Resources["StatusBarColor"] = Brushes.Orange;
                 statusBarItem1.Content = processor.Exception.Message;
@@ -338,8 +510,12 @@ namespace CimPointConv
         private async Task SaveResultAs()
         {
             var format = GetTargetFormat();
-            SaveFileDialog dlg = new();
-            dlg.Title = "Save as...";
+            SaveFileDialog dlg = new()
+            {
+                Title = "Save as...",
+                InitialDirectory = _config.GetSection("RecentDir").Value
+            };
+
             if (format == Format.IGNITION)
                 dlg.Filter = "JSON file (*.json)|*.json";
             else
@@ -350,6 +526,8 @@ namespace CimPointConv
                 Working = true;
                 await SaveResult(dlg.FileName, format);
                 Working = false;
+
+                _config.GetSection("RecentDir").Value = System.IO.Path.GetDirectoryName(dlg.FileName);
             }
         }
 
@@ -378,6 +556,85 @@ namespace CimPointConv
                 System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo("cmd", $"/c start {e.Uri.AbsoluteUri}") { CreateNoWindow = true });
             else
                 System.Diagnostics.Process.Start(e.Uri.AbsoluteUri);
+        }
+
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void Window_Closing(object sender, CancelEventArgs e)
+        {
+            SaveSetting();
+        }
+
+        private void SaveSetting()
+        {
+            var path = System.IO.Path.Combine(_configPath, _configFile);
+            string jsonFile = String.Empty;
+            JsonObject jsonObj;
+
+            try
+            {
+                if (File.Exists(path))
+                {
+                    jsonFile = File.ReadAllText(path);
+                    jsonObj = (JsonObject)JsonObject.Parse(jsonFile);
+                }
+                else
+                {
+                    jsonObj = new JsonObject();
+                }
+
+                jsonObj["RecentDir"] = _config.GetSection("RecentDir").Value;
+                jsonObj["InputFile"] = _config.GetSection("InputFile").Value;
+
+                jsonObj["FilterPoint"] = tbFilterPoint.Text;
+                jsonObj["FilterAddress"] = tbFilterAddress.Text;
+                jsonObj["FilterDevice"] = tbFilterDevice.Text;
+                jsonObj["FilterUseRegex"] = cbFilterRegex.IsChecked.Value;
+                jsonObj["RenameDeviceMask"] = tbRenameFromDevice.Text;
+                jsonObj["RenameDeviceTo"] = tbRenameToDevice.Text;
+                jsonObj["RenameAddressMask"] = tbRenameFromAddress.Text;
+                jsonObj["RenameAddressTo"] = tbRenameToAddress.Text;
+                jsonObj["RenamePointMask"] = tbRenameFromPoint.Text;
+                jsonObj["RenamePointTo"] = tbRenameToPoint.Text;
+                jsonObj["RenameUseRegex"] = cbRenameRegex.IsChecked.Value;
+
+                jsonObj["ConvertToVirtual"] = cbToVirtual.IsChecked.Value;
+                jsonObj["DisableAlarm"] = cbAlarmDisable.IsChecked.Value;
+                jsonObj["EnableEnterprise"] = (!cbEnterprise.IsChecked.Value ? ProcessorOptions.SetProperty.NotSet
+                    : rbE8eEnable.IsChecked.Value ? ProcessorOptions.SetProperty.Enable : ProcessorOptions.SetProperty.Disable).ToString();
+                jsonObj["EnablePoint"] = (!cbEnablePoint.IsChecked.Value ? ProcessorOptions.SetProperty.NotSet
+                    : rbPointEnable.IsChecked.Value ? ProcessorOptions.SetProperty.Enable : ProcessorOptions.SetProperty.Disable).ToString();
+                jsonObj["InitVirtualMode"] = (!cbInit.IsChecked.Value ? ProcessorOptions.InitializationMode.NotSet
+                    : (ProcessorOptions.InitializationMode)cbxInit.SelectedIndex).ToString();
+                jsonObj["LogData"] = (!cbLogPoint.IsChecked.Value ? ProcessorOptions.SetProperty.NotSet
+                    : rbLogEnable.IsChecked.Value ? ProcessorOptions.SetProperty.Enable : ProcessorOptions.SetProperty.Disable).ToString();
+                jsonObj["PollAfterSet"] = (!cbPoll.IsChecked.Value ? ProcessorOptions.SetProperty.NotSet
+                    : rbPollSet.IsChecked.Value ? ProcessorOptions.SetProperty.Enable : ProcessorOptions.SetProperty.Disable).ToString();
+                jsonObj["ReadOnly"] = (!cbReadOnly.IsChecked.Value ? ProcessorOptions.SetProperty.NotSet
+                    : rbRoEnable.IsChecked.Value ? ProcessorOptions.SetProperty.Enable : ProcessorOptions.SetProperty.Disable).ToString();
+
+                jsonObj["SaveTo"] = GetTargetFormat().ToString();
+                jsonObj["SaveOption"] = rbOutNew.IsChecked.Value ? 1 : (
+                                        rbOutSource.IsChecked.Value ? 2 : (
+                                        rbOutClipboard.IsChecked.Value ? 3 : (
+                                        rbOutManual.IsChecked.Value ? 4 : 0)));
+
+                File.WriteAllText(path,
+                    jsonObj.ToJsonString(
+                        new JsonSerializerOptions()
+                        {
+                            WriteIndented = true
+                        })
+                    );
+            }
+            finally
+            {
+
+            }
+
         }
     }
 }
