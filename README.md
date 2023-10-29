@@ -8,6 +8,7 @@ The tool provides batch CIMPLICITY points transformations as well as conversion 
 
 ## Features
 - Rename points, addresses and devices on a filtered set of points
+- Use aritmetic inside regular expression substitutios - e.g. to shift addresses
 - Device to Virtual conversion
 - Convert into different CIMPLICITY version
 - Disable alarms
@@ -35,5 +36,6 @@ Instead of a GUI an application console can also be used. Run *cpc --help* for m
 - CIMPLICITY 10
 - CIMPLICITY 11
 - CIMPLICITY 11.5
+- CIMPLICITY 12.0
 
 CIMPLICITY is a registered trademark of GE Intelligent Platforms, Inc.
