@@ -5,6 +5,8 @@
     <Nullable>enable</Nullable>
 
     <IsPackable>false</IsPackable>
+
+    <FileVersion>1.0.0.23300</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>

@@ -28,6 +28,7 @@ namespace CimPointConv
         CIM82,
         CIM95,
         CIM115,
+        CIM120,
         IGNITION
     };
 

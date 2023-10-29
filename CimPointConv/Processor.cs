@@ -62,14 +62,18 @@ namespace CimPointConv
             {
                 _versionText = value;
 
-                if (_versionText.Equals("7.5"))
+                if(string.IsNullOrEmpty(_versionText))
+                    Version = Format.WHATEVER;
+                else if(_versionText.Equals("7.5"))
                     Version = Format.CIM75;
                 else if (_versionText.Equals("8.2"))
                     Version = Format.CIM82;
-                else if (VersionText.Equals("9.5") || VersionText.StartsWith("10.") || VersionText.Equals("11.0") || VersionText.Equals("11.1"))
+                else if (_versionText.Equals("9.5") || _versionText.StartsWith("10.") || _versionText.Equals("11.0") || _versionText.Equals("11.1"))
                     Version = Format.CIM95;
-                else if (VersionText.Equals("11.5"))
+                else if (_versionText.Equals("11.5"))
                     Version = Format.CIM115;
+                else if (_versionText.Equals("12.0"))
+                    Version = Format.CIM120;
                 else
                     Version = Format.WHATEVER;
 
@@ -159,7 +163,8 @@ namespace CimPointConv
                                     if (!(Version == Format.CIM75 && _columnNames.Length == CimplicityPoint.GetPropertiesCount<CimplicityPoint75>()
                                         || Version == Format.CIM82 && _columnNames.Length == CimplicityPoint.GetPropertiesCount<CimplicityPoint82>()
                                         || Version == Format.CIM95 && _columnNames.Length == CimplicityPoint.GetPropertiesCount<CimplicityPoint95>()
-                                        || Version == Format.CIM115 && _columnNames.Length == CimplicityPoint.GetPropertiesCount<CimplicityPoint115>()))
+                                        || Version == Format.CIM115 && _columnNames.Length == CimplicityPoint.GetPropertiesCount<CimplicityPoint115>()
+                                        || Version == Format.CIM120 && _columnNames.Length == CimplicityPoint.GetPropertiesCount<CimplicityPoint120>()))
                                     {
                                         Exception = new Exception("Columns did not match with expected version from file header");
                                         VersionText = FindVersion(_columnNames);
@@ -185,6 +190,8 @@ namespace CimPointConv
                                 point = new CimplicityPoint95();
                             else if (Version == Format.CIM115)
                                 point = new CimplicityPoint115();
+                            else if (Version == Format.CIM120)
+                                point = new CimplicityPoint120();
                             else
                                 throw new Exception("Unsupported CIMPLICITY version");
 
@@ -225,6 +232,58 @@ namespace CimPointConv
             return "^" + Regex.Escape(value).Replace("\\?", ".").Replace("\\*", ".*") + "$";
         }
 
+        static readonly Regex MathRegex = new Regex(@"<\$(\d+)\s*([\+\-*\/])\s*(\d+)>");
+
+        /// <summary>
+        /// Regular expression string replace
+        /// </summary>
+        /// <param name="pattern"></param>
+        /// <param name="input"></param>
+        /// <param name="replacement"></param>
+        /// <returns></returns>
+        public static string RegexReplace(Regex pattern, string input, string replacement)
+        {
+            var mathMatches = MathRegex.Matches(replacement);
+            if (!mathMatches.Any())
+                return pattern.Replace(input, replacement);
+
+            var inputMatch = pattern.Match(input);
+
+            if (!inputMatch.Success)
+                return input;
+
+            StringBuilder repl = new();
+
+            for (int i=0;i<mathMatches.Count;i++)
+            {
+                var group = int.Parse(mathMatches[i].Groups[1].Value);
+                var oper = mathMatches[i].Groups[2].Value;
+                var number = int.Parse(mathMatches[i].Groups[3].Value);
+
+                if(int.TryParse(inputMatch.Groups[group].Value, out int value))
+                {
+                    switch(oper)
+                    {
+                        case "+":
+                            value += number;
+                            break;
+                        case "-":
+                            value -= number;
+                            break;
+                        case "*":
+                            value *= number;
+                            break;
+                        case "/":
+                            value /= number;
+                            break;
+                    }
+
+                    replacement = replacement.Replace(mathMatches[i].Value, value.ToString());
+                }                
+            }
+            return pattern.Replace(input, replacement);
+        }
+
         /// <summary>
         /// Process loaded points
         /// </summary>
@@ -257,28 +316,28 @@ namespace CimPointConv
                 else
                     devicergx = null;
 
-                for (int i = 0; i < PointsProcesed.Count(); i++)
+                for (int i = 0; i < PointsProcesed.Length; i++)
                 {
                     var p2u = PointsProcesed[i].Clone();
 
                     if (pointRename)
                     {
                         if (options.RenameUseRegex)
-                            p2u.PT_ID = pointrgx.Replace(p2u.PT_ID, options.RenamePointTo);
+                            p2u.PT_ID = RegexReplace(pointrgx, p2u.PT_ID, options.RenamePointTo);
                         else
                             p2u.PT_ID = p2u.PT_ID.Replace(options.RenamePointMask, options.RenamePointTo);
                     }
                     if (addressRename)
                     {
                         if (options.RenameUseRegex)
-                            p2u.ADDR = addressrgx.Replace(p2u.ADDR, options.RenameAddressTo);
+                            p2u.ADDR = RegexReplace(addressrgx, p2u.ADDR, options.RenameAddressTo);
                         else
                             p2u.ADDR = p2u.ADDR.Replace(options.RenameAddressMask, options.RenameAddressTo);
                     }
                     if (deviceRename)
                     {
                         if (options.RenameUseRegex)
-                            p2u.DEVICE_ID = devicergx.Replace(p2u.DEVICE_ID, options.RenameDeviceTo);
+                            p2u.DEVICE_ID = RegexReplace(devicergx, p2u.DEVICE_ID, options.RenameDeviceTo);
                         else
                             p2u.DEVICE_ID = p2u.DEVICE_ID.Replace(options.RenameDeviceMask, options.RenameDeviceTo);
                     }
@@ -322,7 +381,7 @@ namespace CimPointConv
                             else if (options.InitVirtualMode == ProcessorOptions.InitializationMode.Saved)
                             {
                                 p2u.RESET_COND = "SA";
-                                if(string.IsNullOrEmpty(p2u.PROC_ID))
+                                if (string.IsNullOrEmpty(p2u.PROC_ID))
                                     p2u.PROC_ID = "MASTER_PTDP_RP";
                             }
                             else if (options.InitVirtualMode == ProcessorOptions.InitializationMode.SavedOrInit)
@@ -455,6 +514,8 @@ namespace CimPointConv
                     PointsProcesed = PointsProcesed.Select(x => x.CloneTo<CimplicityPoint95>()).ToArray();
                 else if (format == Format.CIM115)
                     PointsProcesed = PointsProcesed.Select(x => x.CloneTo<CimplicityPoint115>()).ToArray();
+                else if (format == Format.CIM120)
+                    PointsProcesed = PointsProcesed.Select(x => x.CloneTo<CimplicityPoint120>()).ToArray();
             }
 
             PropertyInfo[] properties;
@@ -475,6 +536,10 @@ namespace CimPointConv
 
                 case Format.CIM115:
                     properties = typeof(CimplicityPoint115).GetProperties().Where(x => !x.Name.Equals("PT_ID")).OrderBy(x => x.Name).ToArray();
+                    break;
+
+                case Format.CIM120:
+                    properties = typeof(CimplicityPoint120).GetProperties().Where(x => !x.Name.Equals("PT_ID")).OrderBy(x => x.Name).ToArray();
                     break;
 
                 default:

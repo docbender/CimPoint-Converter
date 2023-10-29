@@ -25,7 +25,7 @@
         mc:Ignorable="d"
         Title="{Binding Version, StringFormat='CimPoint Converter - {0}'}" Height="590" Width="600" Background="#FF2D2D30" Foreground="White" 
         AllowDrop="True" DragEnter="Window_DragEnter" DragLeave="Window_DragLeave" Drop="Window_Drop" 
-        MinWidth="600" MinHeight="590" ResizeMode="CanResizeWithGrip" BorderThickness="1,1,1,1" Closing="Window_Closing" Loaded="Window_Loaded">
+        MinWidth="600" MinHeight="610" ResizeMode="CanResizeWithGrip" BorderThickness="1,1,1,1" Closing="Window_Closing" Loaded="Window_Loaded">
     <Window.Resources>
         <Style x:Key="labelStyle" TargetType="Label">
             <Setter Property="Foreground" Value="White" />
@@ -184,15 +184,15 @@
                     <RowDefinition Height="auto"/>
                 </Grid.RowDefinitions>
                 <Label x:Name="lbRenamePoint" Grid.Column="0" Grid.Row="0" Style="{StaticResource labelStyle}" Margin="0" Content="Point:" />
-                <TextBox x:Name="tbRenameFromPoint" Grid.Column="1" Grid.Row="0" Style="{StaticResource filterStyle}" Margin="0,0,10,0" d:Text="ABCD"/>
-                <TextBox x:Name="tbRenameToPoint" Grid.Column="1" Grid.Row="1" Style="{StaticResource filterStyle}" Margin="0,0,10,5" d:Text="ABCD"/>
+                <TextBox x:Name="tbRenameFromPoint" Grid.Column="1" Grid.Row="0" Style="{StaticResource filterStyle}" Margin="0,0,10,0" d:Text="ABCD" ToolTip="Search pattern"/>
+                <TextBox x:Name="tbRenameToPoint" Grid.Column="1" Grid.Row="1" Style="{StaticResource filterStyle}" Margin="0,0,10,5" d:Text="ABCD" ToolTip="Replacement"/>
                 <Label x:Name="lbRenameAddress" Grid.Column="2" Grid.Row="0" Style="{StaticResource labelStyle}" Margin="0" Content="Address:" />
-                <TextBox x:Name="tbRenameFromAddress" Grid.Column="3" Grid.Row="0" Style="{StaticResource filterStyle}" Margin="0,0,10,0" d:Text="ABCD"/>
-                <TextBox x:Name="tbRenameToAddress" Grid.Column="3" Grid.Row="1" Style="{StaticResource filterStyle}" Margin="0,0,10,5" d:Text="ABCD"/>
+                <TextBox x:Name="tbRenameFromAddress" Grid.Column="3" Grid.Row="0" Style="{StaticResource filterStyle}" Margin="0,0,10,0" d:Text="ABCD" ToolTip="Search pattern"/>
+                <TextBox x:Name="tbRenameToAddress" Grid.Column="3" Grid.Row="1" Style="{StaticResource filterStyle}" Margin="0,0,10,5" d:Text="ABCD" ToolTip="Replacement"/>
                 <Label x:Name="lbRenameDevice" Grid.Column="4" Grid.Row="0" Style="{StaticResource labelStyle}" Margin="0" Content="Device:" />
-                <TextBox x:Name="tbRenameFromDevice" Grid.Column="5" Grid.Row="0" Style="{StaticResource filterStyle}" Margin="0,0,5,0" d:Text="ABCD"/>
-                <TextBox x:Name="tbRenameToDevice" Grid.Column="5" Grid.Row="1" Style="{StaticResource filterStyle}" Margin="0,0,5,5" d:Text="ABCD"/>
-                <CheckBox x:Name="cbRenameRegex" Grid.Column="1" Grid.Row="2" Grid.ColumnSpan="4" Style="{StaticResource cbStyle}" Content="Use regular expression" Margin="20,5,0,5" HorizontalAlignment="Center"/>
+                <TextBox x:Name="tbRenameFromDevice" Grid.Column="5" Grid.Row="0" Style="{StaticResource filterStyle}" Margin="0,0,5,0" d:Text="ABCD" ToolTip="Search pattern"/>
+                <TextBox x:Name="tbRenameToDevice" Grid.Column="5" Grid.Row="1" Style="{StaticResource filterStyle}" Margin="0,0,5,5" d:Text="ABCD" ToolTip="Replacement"/>
+                <CheckBox x:Name="cbRenameRegex" Grid.Column="1" Grid.Row="2" Grid.ColumnSpan="4" Style="{StaticResource cbStyle}" Content="Use regular expression" Margin="20,5,0,5" HorizontalAlignment="Center" ToolTip="In regular expression basic arithmetic with captuted group can be used&#x0a;if math expression is inside angle backets.&#x0a;Example:&#x0a;     address 'I151' with pattern 'I(\d+)' and replacement 'I&lt;$1+50&gt;' will result in 'I201'&#x0a;     address 'DB1.DBB1' with pattern '(DB\d+\.DB.)(\d+)' and replacement '${1}&lt;$2+1&gt;' will result in 'DB1.DBB2' "/>
             </Grid>
         </GroupBox>
         <GroupBox Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="1"  Header="Conversion" >
@@ -254,7 +254,8 @@
                     <RadioButton x:Name="rbSevenFive" Style="{StaticResource rbStyle}" Content="7.5" IsEnabled="{Binding ElementName=cbFormat, Path=IsChecked}"/>
                     <RadioButton x:Name="rbEightTwo" Style="{StaticResource rbStyle}" Content="8.2" IsEnabled="{Binding ElementName=cbFormat, Path=IsChecked}"/>
                     <RadioButton x:Name="rbNineFive" Style="{StaticResource rbStyle}" Content="9.5 - 11" IsEnabled="{Binding ElementName=cbFormat, Path=IsChecked}"/>
-                    <RadioButton x:Name="rbElevenFive" Style="{StaticResource rbStyle}" Content="11.5" IsEnabled="{Binding ElementName=cbFormat, Path=IsChecked}"/>                    
+                    <RadioButton x:Name="rbElevenFive" Style="{StaticResource rbStyle}" Content="11.5" IsEnabled="{Binding ElementName=cbFormat, Path=IsChecked}"/>
+                    <RadioButton x:Name="rbTwelve" Style="{StaticResource rbStyle}" Content="2023" IsEnabled="{Binding ElementName=cbFormat, Path=IsChecked}"/>
                 </WrapPanel>
                 <CheckBox x:Name="cbIgnition" Style="{StaticResource cbStyle}" Content="Convert to Ignition" Margin="5,5,0,5" IsChecked="{Binding IsCheckedIgnition}"/>
                 <Label Style="{StaticResource labelStyle}"  Content="Save result:" Padding="5,5,0,0"/>
@@ -290,7 +291,7 @@
                 <Hyperlink Foreground="Silver" FontWeight="SemiBold" TextDecorations="None" RequestNavigate="Hyperlink_RequestNavigate" NavigateUri="https://github.com/docbender/CimPoint-Converter">
                 FOSS
                 <LineBreak />
-                (c)2022 Vita Tucek
+                &#169;2023 Vita Tucek
                 </Hyperlink>
             </TextBlock>
         </Grid>

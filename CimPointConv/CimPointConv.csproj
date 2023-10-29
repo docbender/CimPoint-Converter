@@ -9,12 +9,13 @@
     <Product>CimPoint Converter</Product>
     <Authors>Vita Tucek</Authors>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
-    <Copyright>(c)2022 Vita Tucek</Copyright>
+    <Copyright>(c)2023 Vita Tucek</Copyright>
     <Description>CIMPLICITY points converter</Description>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <Configurations>Debug;Release;Release Self Contained</Configurations>
     <ApplicationIcon>app.ico</ApplicationIcon>
-    <Version>1.2.0</Version>
+    <Version>1.3.0</Version>
+    <FileVersion>1.3.0.23302</FileVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -63,8 +64,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="6.0.0" />
-    <PackageReference Include="System.Text.Encoding.CodePages" Version="6.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="7.0.0" />
+    <PackageReference Include="System.Text.Encoding.CodePages" Version="7.0.0" />
   </ItemGroup>
 
 </Project>

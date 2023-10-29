@@ -198,6 +198,10 @@ namespace CimPointConv
                         IsCheckedCimplicity = true;
                         rbElevenFive.IsChecked = true;
                         break;
+                    case Format.CIM120:
+                        IsCheckedCimplicity = true;
+                        rbTwelve.IsChecked = true;
+                        break;
                     case Format.IGNITION:
                         IsCheckedIgnition = true;
                         break;
@@ -396,6 +400,8 @@ namespace CimPointConv
                     rbNineFive.IsChecked = true;
                 else if (processor.Version == Format.CIM115)
                     rbElevenFive.IsChecked = true;
+                else if (processor.Version == Format.CIM120)
+                    rbTwelve.IsChecked = true;
             }
             Working = false;
         }
@@ -540,7 +546,8 @@ namespace CimPointConv
                     (rbEightTwo.IsChecked.Value ? Format.CIM82 :
                     (rbNineFive.IsChecked.Value ? Format.CIM95 :
                     (rbElevenFive.IsChecked.Value ? Format.CIM115 :
-                    Format.WHATEVER)));
+                    (rbTwelve.IsChecked.Value ? Format.CIM120 :
+                    Format.WHATEVER))));
             return Format.WHATEVER;
         }
 
