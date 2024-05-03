@@ -291,7 +291,7 @@
                 <Hyperlink Foreground="Silver" FontWeight="SemiBold" TextDecorations="None" RequestNavigate="Hyperlink_RequestNavigate" NavigateUri="https://github.com/docbender/CimPoint-Converter">
                 FOSS
                 <LineBreak />
-                &#169;2023 Vita Tucek
+                &#169;2024 Vita Tucek
                 </Hyperlink>
             </TextBlock>
         </Grid>
